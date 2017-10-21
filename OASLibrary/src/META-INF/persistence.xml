@@ -3,6 +3,11 @@
   <persistence-unit name="OnlineAuctionSystem_OAS_-ejbPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>entity.Employee</class>
+    <class>entity.Customer</class>
+    <class>entity.CreditTransaction</class>
+    <class>entity.Bid</class>
+    <class>entity.AuctionListing</class>
+    <class>entity.CreditPackage</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/onlineauctionsystem?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

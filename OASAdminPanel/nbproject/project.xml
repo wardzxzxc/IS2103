@@ -11,11 +11,11 @@
             <test-roots>
                 <root id="test.src.dir" name="Test Packages"/>
             </test-roots>
-            <included-library dirs="200">reference.RetailCoreBankingSystemLibrary.jar</included-library>
+            <included-library dirs="200">reference.OASLibrary.jar</included-library>
         </data>
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">
             <reference>
-                <foreign-project>RetailCoreBankingSystemLibrary</foreign-project>
+                <foreign-project>OASLibrary</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>

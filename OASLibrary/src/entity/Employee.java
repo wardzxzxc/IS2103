@@ -28,7 +28,7 @@ public class Employee implements Serializable {
     private Long id;
     @Column(nullable = false, length = 32, unique = true)
     private String username;
-    @Column(nullable = false, length = 32)
+    @Column(nullable = false, length = 12)
     private String password;
     @Column(nullable = false, length = 32)
     private String firstName;
@@ -97,8 +97,6 @@ public class Employee implements Serializable {
         return accessRight;
     }
     
-    
-
     public Long getId() {
         return id;
     }

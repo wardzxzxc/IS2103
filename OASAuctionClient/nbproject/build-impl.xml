@@ -770,10 +770,10 @@ exists or setup the property manually. For example like this:
         </fail>
     </target>
     <target depends="init" if="no.dist.ear.dir" name="-deps-module-jar" unless="no.deps">
-        <ant antfile="${project.RetailCoreBankingSystemLibrary}/build.xml" inheritall="false" target="jar"/>
+        <ant antfile="${project.OASLibrary}/build.xml" inheritall="false" target="jar"/>
     </target>
     <target depends="init" if="dist.ear.dir" name="-deps-ear-jar" unless="no.deps">
-        <ant antfile="${project.RetailCoreBankingSystemLibrary}/build.xml" inheritall="false" target="jar"/>
+        <ant antfile="${project.OASLibrary}/build.xml" inheritall="false" target="jar"/>
     </target>
     <target depends="init, -check-main-class, -deps-module-jar, -deps-ear-jar" name="deps-jar"/>
     <target depends="init,deps-jar" name="-pre-pre-compile">
@@ -784,16 +784,16 @@ exists or setup the property manually. For example like this:
         <!-- You can override this target in the ../build.xml file. -->
     </target>
     <target depends="compile" if="is.server.weblogic" name="library-inclusion-in-archive">
-        <basename file="${reference.RetailCoreBankingSystemLibrary.jar}" property="manifest.reference.RetailCoreBankingSystemLibrary.jar"/>
+        <basename file="${reference.OASLibrary.jar}" property="manifest.reference.OASLibrary.jar"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
             <attribute name="Extension-List" value="jar-1 "/>
-            <attribute name="jar-1-Extension-Name" value="${manifest.reference.RetailCoreBankingSystemLibrary.jar}"/>
+            <attribute name="jar-1-Extension-Name" value="${manifest.reference.OASLibrary.jar}"/>
         </manifest>
     </target>
     <target depends="compile" if="dist.ear.dir" name="library-inclusion-in-manifest">
-        <copyfiles files="${reference.RetailCoreBankingSystemLibrary.jar}" manifestproperty="manifest.reference.RetailCoreBankingSystemLibrary.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.OASLibrary.jar}" manifestproperty="manifest.reference.OASLibrary.jar" todir="${dist.ear.dir}/lib"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Class-Path" value="${manifest.reference.RetailCoreBankingSystemLibrary.jar} lib/${manifest.reference.RetailCoreBankingSystemLibrary.jar} "/>
+            <attribute name="Class-Path" value="${manifest.reference.OASLibrary.jar} lib/${manifest.reference.OASLibrary.jar} "/>
         </manifest>
     </target>
     <target name="-copy-meta-inf">
@@ -1297,7 +1297,7 @@ exists or setup the property manually. For example like this:
                 ===============
             -->
     <target depends="init" name="deps-clean" unless="no.deps">
-        <ant antfile="${project.RetailCoreBankingSystemLibrary}/build.xml" inheritall="false" target="clean"/>
+        <ant antfile="${project.OASLibrary}/build.xml" inheritall="false" target="clean"/>
     </target>
     <target depends="init" name="-do-clean">
         <delete dir="${build.dir}"/>
