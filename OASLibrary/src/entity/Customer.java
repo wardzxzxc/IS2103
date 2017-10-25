@@ -7,6 +7,7 @@ package entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -51,6 +52,11 @@ public class Customer implements Serializable {
     
     public Customer() {
         this.creditCurrBalance = new BigDecimal("0.0000");
+        
+        this.creditTransaction = new ArrayList<>();
+        this.auctionsWon = new ArrayList<>();
+        this.bids = new ArrayList<>();
+        
     }
     
     public Customer(String firstName, String lastName, String identificationNumber, String contactNumber) {

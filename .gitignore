@@ -1,0 +1,12 @@
+/OASLibrary/build/
+/OASLibrary/dist/
+/OnlineAuctionSystem(OAS)-ejb/dist/
+/OnlineAuctionSystem(OAS)-ejb/build/
+/OASAdminPanel/build/
+/OASAdminPanel/dist/
+/OASAuctionClient/dist/
+/OASAuctionClient/build/
+/OnlineAuctionSystem(OAS)-war/build/
+/OnlineAuctionSystem(OAS)-war/dist/
+/dist/
+/build/

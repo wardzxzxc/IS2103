@@ -7,6 +7,7 @@ package entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -53,6 +54,8 @@ public class AuctionListing implements Serializable {
     
     public AuctionListing() {
         this.currentPrice = this.reservedPrice;
+        
+        this.bids = new ArrayList<>();
     }
 
     public AuctionListing(BigDecimal reservedPrice, String productName, Boolean active, Date startDateTime, Date endDateTime) {
