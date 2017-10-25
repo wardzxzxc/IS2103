@@ -32,9 +32,9 @@ public class CreditPackage implements Serializable {
     public CreditPackage() {
     }
 
-    public CreditPackage(Boolean enabled, BigDecimal creditPerDollar) {
+    public CreditPackage(Boolean enabled, BigDecimal creditPerPackage) {
         this.enabled = enabled;
-        this.creditPerPackage = creditPerDollar;
+        this.creditPerPackage = creditPerPackage;
     }
     
     public Long getCreditPackageId() {

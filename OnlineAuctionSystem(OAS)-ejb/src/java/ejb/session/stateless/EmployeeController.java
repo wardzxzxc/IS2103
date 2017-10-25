@@ -1,21 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ejb.session.stateless;
 
 import entity.Employee;
+import java.util.List;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import util.exception.EmployeeExistException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.EmployeePasswordChangeException;
 import util.exception.GeneralException;
+import util.exception.InvalidLoginCredentialException;
 
 /**
  *
@@ -29,12 +29,9 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
     
     @PersistenceContext(unitName = "OnlineAuctionSystem_OAS_-ejbPU")
     private EntityManager em;
-
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
-    
+   
     @Override
-    public Employee createNewEmployee (Employee employee) throws EmployeeExistException, GeneralException  {
+    public Employee createNewEmployee(Employee employee) throws EmployeeExistException, GeneralException  {
         try
         {
             em.persist(employee);
@@ -53,24 +50,62 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
             {
                 throw new GeneralException("An unexpected error has occured" + ex.getMessage());
             }
-            
         }
     }
     
     @Override
-    public Employee retrieveEmployeeByEmployeeId (String id) throws EmployeeNotFoundException {
+    public Employee retrieveEmployeeByEmployeeId(Long employeeId) throws EmployeeNotFoundException {
        
-        Employee employee = em.find(Employee.class, id);
+        Employee employee = em.find(Employee.class, employeeId);
         
         if (employee != null) {
             return employee;
         } else {
-            throw new EmployeeNotFoundException("Employee ID " + id + "does not exist");
+            throw new EmployeeNotFoundException("Employee ID " + employeeId + "does not exist");
         }
     }
     
     @Override
-    public void changePassword(String employeeId, String currentPassword, String newPassword) throws EmployeeNotFoundException, EmployeePasswordChangeException {
+    public List<Employee> retrieveAllEmployees() {
+        
+        Query query = em.createQuery("SELECT e FROM Employee e");
+        
+        return query.getResultList();
+    }
+    
+    @Override
+    public Employee retrieveEmployeeByUsername(String username) throws EmployeeNotFoundException {
+        
+        Query query = em.createQuery("SELECT e from Employee e WHERE e.username = :inUsername");
+        query.setParameter("inUsername", username);
+        
+        try {
+            return (Employee)query.getSingleResult();
+        }
+        catch(NoResultException | NonUniqueResultException ex) {
+            throw new EmployeeNotFoundException("Employee Username " + username + "does not exist");
+        }
+    }
+    
+    @Override
+    public Employee employeeLogin(String username, String password) throws InvalidLoginCredentialException {
+        
+        try {
+            Employee employee = retrieveEmployeeByUsername(username);
+            
+            if (employee.getPassword().equals(password)) {
+                return employee;
+            } else {
+                throw new InvalidLoginCredentialException("Username does not exist or invalid password");
+            }
+        }
+        catch (EmployeeNotFoundException ex) {
+            throw new InvalidLoginCredentialException("Username does not exist or invalid password");
+        }
+    }
+    
+    @Override
+    public void changePassword(Long employeeId, String currentPassword, String newPassword) throws EmployeeNotFoundException, EmployeePasswordChangeException {
         
         Employee employee = retrieveEmployeeByEmployeeId(employeeId);
         
@@ -79,5 +114,22 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         } else {
             throw new EmployeePasswordChangeException("Old password keyed in is invalid");
         }
+    }
+    
+    @Override
+    public void updateEmployee(Employee employee) {
+        em.merge(employee);
+    }
+    
+    @Override
+    public void deleteEmployee(Long employeeId) throws EmployeeNotFoundException {
+        
+        Employee employee = retrieveEmployeeByEmployeeId(employeeId);
+        
+        if (employee != null) {
+            em.remove(employee);
+        } else {
+            throw new EmployeeNotFoundException("Employee ID " + employeeId + "does not exist");
+        }   
     }
 }
