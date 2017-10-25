@@ -11,6 +11,11 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import util.exception.EmployeeExistException;
+import util.exception.EmployeeNotFoundException;
+import util.exception.EmployeePasswordChangeException;
+import util.exception.GeneralException;
 
 /**
  *
@@ -29,15 +34,50 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
     // "Insert Code > Add Business Method")
     
     @Override
-    public Employee createNewEmployee(Employee employee) {
+    public Employee createNewEmployee (Employee employee) throws EmployeeExistException, GeneralException  {
         try
         {
             em.persist(employee);
             em.flush();
             em.refresh(employee);
             
-            return employee
+            return employee;
         }
         catch(PersistenceException ex)
+        {
+            if(ex.getCause() != null && ex.getCause().getCause().getClass().getSimpleName().equals("MySQLIntegrityConstraintViolationException"))
+            {
+             throw new EmployeeExistException("Employee with same username already exist");   
+            }
+            else 
+            {
+                throw new GeneralException("An unexpected error has occured" + ex.getMessage());
+            }
+            
+        }
+    }
+    
+    @Override
+    public Employee retrieveEmployeeByEmployeeId (String id) throws EmployeeNotFoundException {
+       
+        Employee employee = em.find(Employee.class, id);
+        
+        if (employee != null) {
+            return employee;
+        } else {
+            throw new EmployeeNotFoundException("Employee ID " + id + "does not exist");
+        }
+    }
+    
+    @Override
+    public void changePassword(String employeeId, String currentPassword, String newPassword) throws EmployeeNotFoundException, EmployeePasswordChangeException {
+        
+        Employee employee = retrieveEmployeeByEmployeeId(employeeId);
+        
+        if (employee.getPassword().equals(currentPassword)) {
+            employee.setPassword(newPassword);
+        } else {
+            throw new EmployeePasswordChangeException("Old password keyed in is invalid");
+        }
     }
 }
