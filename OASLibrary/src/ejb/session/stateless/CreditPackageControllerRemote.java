@@ -7,7 +7,6 @@ package ejb.session.stateless;
 
 import entity.CreditPackage;
 import java.math.BigDecimal;
-import javax.ejb.Remote;
 import util.exception.CreditPackageExistException;
 import util.exception.CreditPackageNotFoundException;
 import util.exception.CreditPackageValueChangeException;
@@ -17,7 +16,6 @@ import util.exception.GeneralException;
  *
  * @author Edward
  */
-@Remote
 public interface CreditPackageControllerRemote {
     
        public CreditPackage createNewCreditPackage(CreditPackage creditPackage) throws CreditPackageExistException, GeneralException;

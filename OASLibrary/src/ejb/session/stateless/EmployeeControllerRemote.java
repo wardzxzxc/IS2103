@@ -6,7 +6,6 @@
 package ejb.session.stateless;
 
 import entity.Employee;
-import javax.ejb.Remote;
 import util.exception.EmployeeExistException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.EmployeePasswordChangeException;
@@ -16,7 +15,6 @@ import util.exception.GeneralException;
  *
  * @author Edward
  */
-@Remote
 public interface EmployeeControllerRemote {
     
     public Employee createNewEmployee(Employee employee) throws EmployeeExistException, GeneralException;
