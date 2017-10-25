@@ -25,7 +25,7 @@ public class Employee implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long employeeId;
     @Column(nullable = false, length = 32, unique = true)
     private String username;
     @Column(nullable = false, length = 12)
@@ -43,9 +43,10 @@ public class Employee implements Serializable {
         
         
     }
+    
+    
 
-    public Employee(Long id, String username, String password, String firstName, String lastName, EmployeeAccessRightsEnum accessRight) {
-        this.id = id;
+    public Employee(String username, String password, String firstName, String lastName, EmployeeAccessRightsEnum accessRight) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
@@ -97,18 +98,18 @@ public class Employee implements Serializable {
         return accessRight;
     }
     
-    public Long getId() {
-        return id;
+    public Long getEmployeeId() {
+        return employeeId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (employeeId != null ? employeeId.hashCode() : 0);
         return hash;
     }
 
@@ -119,7 +120,7 @@ public class Employee implements Serializable {
             return false;
         }
         Employee other = (Employee) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.employeeId == null && other.employeeId != null) || (this.employeeId != null && !this.employeeId.equals(other.employeeId))) {
             return false;
         }
         return true;
@@ -127,7 +128,7 @@ public class Employee implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.Employee[ id=" + id + " ]";
+        return "entity.Employee[ id=" + employeeId + " ]";
     }
     
 }

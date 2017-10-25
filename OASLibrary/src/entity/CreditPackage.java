@@ -23,40 +23,48 @@ public class CreditPackage implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long creditPackageId;
     @Column(nullable = false)
-    private Boolean disabled;
+    private Boolean enabled;
     @Column(nullable = false, precision = 18, scale = 4)
-    private BigDecimal credit;    
+    private BigDecimal creditPerPackage;    
 
-    public Long getId() {
-        return id;
+    public CreditPackage() {
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public CreditPackage(Boolean enabled, BigDecimal creditPerDollar) {
+        this.enabled = enabled;
+        this.creditPerPackage = creditPerDollar;
+    }
+    
+    public Long getCreditPackageId() {
+        return creditPackageId;
     }
 
-    public Boolean getDisabled() {
-        return disabled;
+    public void setCreditPackageId(Long creditPackageId) {
+        this.creditPackageId = creditPackageId;
     }
 
-    public BigDecimal getCredit() {
-        return credit;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setDisabled(Boolean disabled) {
-        this.disabled = disabled;
+    public BigDecimal getCreditPerPackage() {
+        return creditPerPackage;
     }
 
-    public void setCredit(BigDecimal credit) {
-        this.credit = credit;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setCreditPerPackage(BigDecimal creditPerPackage) {
+        this.creditPerPackage = creditPerPackage;
     }
     
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (creditPackageId != null ? creditPackageId.hashCode() : 0);
         return hash;
     }
 
@@ -67,7 +75,7 @@ public class CreditPackage implements Serializable {
             return false;
         }
         CreditPackage other = (CreditPackage) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.creditPackageId == null && other.creditPackageId != null) || (this.creditPackageId != null && !this.creditPackageId.equals(other.creditPackageId))) {
             return false;
         }
         return true;
@@ -75,7 +83,7 @@ public class CreditPackage implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.CreditPackage[ id=" + id + " ]";
+        return "entity.CreditPackage[ id=" + creditPackageId + " ]";
     }
     
 }

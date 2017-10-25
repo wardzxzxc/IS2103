@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,15 +31,15 @@ public class AuctionListing implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long auctionListingId;
     @Column(nullable = false, precision = 18, scale = 4)
-    private BigDecimal reservedPrice;
-    @Column(nullable = false, length = 32)
+    private BigDecimal reservePrice;
+    @Column(nullable = false, length = 50)
     private String productName;
     @Column(nullable = false)
     private Boolean active;
     @Column(nullable = false, precision = 18, scale = 4)
-    private BigDecimal currentPrice;
+    private BigDecimal currentHighestPrice;
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDateTime;
@@ -48,19 +49,17 @@ public class AuctionListing implements Serializable {
     
     @ManyToOne
     private Customer customerWon;
-    @OneToMany(mappedBy = "auctionListing")
+    @OneToMany(mappedBy = "auctionListing", cascade = CascadeType.ALL)
     private List<Bid> bids;
     
-    
-    public AuctionListing() {
-        this.currentPrice = this.reservedPrice;
-        
+    public AuctionListing() {        
         this.bids = new ArrayList<>();
     }
 
-    public AuctionListing(BigDecimal reservedPrice, String productName, Boolean active, Date startDateTime, Date endDateTime) {
+    public AuctionListing(BigDecimal reservePrice, BigDecimal currentHighestPrice , String productName, Boolean active, Date startDateTime, Date endDateTime) {
         this();
-        this.reservedPrice = reservedPrice;
+        this.currentHighestPrice = currentHighestPrice;
+        this.reservePrice = reservePrice;
         this.productName = productName;
         this.active = active;
         this.startDateTime = startDateTime;
@@ -74,8 +73,6 @@ public class AuctionListing implements Serializable {
     public void setBids(List<Bid> bids) {
         this.bids = bids;
     }
-
-    
     
     public Customer getCustomerWon() {
         return customerWon;
@@ -83,9 +80,7 @@ public class AuctionListing implements Serializable {
 
     public List<Bid> getBids() {
         return bids;
-    }
-
-    
+    }   
     
     public void setStartDateTime(Date startDateTime) {
         this.startDateTime = startDateTime;
@@ -102,11 +97,9 @@ public class AuctionListing implements Serializable {
     public Date getEndDateTime() {
         return endDateTime;
     }
-    
-    
 
-    public BigDecimal getReservedPrice() {
-        return reservedPrice;
+    public BigDecimal getReservePrice() {
+        return reservePrice;
     }
 
     public String getProductName() {
@@ -117,12 +110,12 @@ public class AuctionListing implements Serializable {
         return active;
     }
 
-    public BigDecimal getCurrentPrice() {
-        return currentPrice;
+    public BigDecimal getCurrentHighestPrice() {
+        return currentHighestPrice;
     }
 
-    public void setReservedPrice(BigDecimal reservedPrice) {
-        this.reservedPrice = reservedPrice;
+    public void setReservePrice(BigDecimal reservePrice) {
+        this.reservePrice = reservePrice;
     }
 
     public void setProductName(String productName) {
@@ -133,27 +126,22 @@ public class AuctionListing implements Serializable {
         this.active = active;
     }
 
-    public void setCurrentPrice(BigDecimal currentPrice) {
-        this.currentPrice = currentPrice;
+    public void setCurrentHighestPrice(BigDecimal currentHighestPrice) {
+        this.currentHighestPrice = currentHighestPrice;
     }
-    
-    
-    
-    
-    
-
-    public Long getId() {
-        return id;
+ 
+    public Long getAuctionListingId() {
+        return auctionListingId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setAuctionListingId(Long auctionListingId) {
+        this.auctionListingId = auctionListingId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (auctionListingId != null ? auctionListingId.hashCode() : 0);
         return hash;
     }
 
@@ -164,7 +152,7 @@ public class AuctionListing implements Serializable {
             return false;
         }
         AuctionListing other = (AuctionListing) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.auctionListingId == null && other.auctionListingId != null) || (this.auctionListingId != null && !this.auctionListingId.equals(other.auctionListingId))) {
             return false;
         }
         return true;
@@ -172,7 +160,7 @@ public class AuctionListing implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.AuctionListing[ id=" + id + " ]";
+        return "entity.AuctionListing[ id=" + auctionListingId + " ]";
     }
     
 }

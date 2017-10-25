@@ -25,11 +25,9 @@ public class Bid implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long bidId;
     @Column(nullable = false, precision = 18, scale = 4)
     private BigDecimal amount;
-    @Column(nullable = false)
-    private Boolean winningBid;
     
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
@@ -41,9 +39,10 @@ public class Bid implements Serializable {
     public Bid() {
     }
 
-    public Bid(BigDecimal amount, Boolean winningBid) {
+    public Bid(BigDecimal amount, Customer customer, AuctionListing auctionListing) {
         this.amount = amount;
-        this.winningBid = winningBid;
+        this.customer = customer;
+        this.auctionListing = auctionListing;
     }
 
     public Customer getCustomer() {
@@ -62,35 +61,27 @@ public class Bid implements Serializable {
         this.auctionListing = auctionListing;
     }
     
-    public Long getId() {
-        return id;
+    public Long getBidId() {
+        return bidId;
     }
 
     public BigDecimal getAmount() {
         return amount;
     }
 
-    public Boolean getWinningBid() {
-        return winningBid;
-    }
-
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public void setWinningBid(Boolean winningBid) {
-        this.winningBid = winningBid;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setBidId(Long bidId) {
+        this.bidId = bidId;
     }
-
     
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (bidId != null ? bidId.hashCode() : 0);
         return hash;
     }
 
@@ -101,7 +92,7 @@ public class Bid implements Serializable {
             return false;
         }
         Bid other = (Bid) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.bidId == null && other.bidId != null) || (this.bidId != null && !this.bidId.equals(other.bidId))) {
             return false;
         }
         return true;
@@ -109,7 +100,7 @@ public class Bid implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.Bid[ id=" + id + " ]";
+        return "entity.Bid[ id=" + bidId + " ]";
     }
     
 }

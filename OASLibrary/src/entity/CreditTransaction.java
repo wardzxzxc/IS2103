@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -26,21 +28,33 @@ public class CreditTransaction implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long creditTransactionId;
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionDateTime;
-    @Column(length = 8, nullable = false)
-    private String code;
     @Column(nullable = false, precision = 18, scale = 4)
     private BigDecimal amount;    
 
-    public Date getTransactionDateTime() {
-        return transactionDateTime;
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
+    private Customer customer;
+
+    public CreditTransaction(Date transactionDateTime, BigDecimal amount, Customer customer) {
+        this.transactionDateTime = transactionDateTime;
+        this.amount = amount;
+        this.customer = customer;
     }
 
-    public String getCode() {
-        return code;
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+    
+    public Date getTransactionDateTime() {
+        return transactionDateTime;
     }
 
     public BigDecimal getAmount() {
@@ -51,26 +65,23 @@ public class CreditTransaction implements Serializable {
         this.transactionDateTime = transactionDateTime;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
     
-    public Long getId() {
-        return id;
+    public Long getCreditTransactionId() {
+        return creditTransactionId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCreditTransactionId(Long creditTransactionId) {
+        this.creditTransactionId = creditTransactionId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (creditTransactionId != null ? creditTransactionId.hashCode() : 0);
         return hash;
     }
 
@@ -81,7 +92,7 @@ public class CreditTransaction implements Serializable {
             return false;
         }
         CreditTransaction other = (CreditTransaction) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.creditTransactionId == null && other.creditTransactionId != null) || (this.creditTransactionId != null && !this.creditTransactionId.equals(other.creditTransactionId))) {
             return false;
         }
         return true;
@@ -89,7 +100,7 @@ public class CreditTransaction implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.CreditTransaction[ id=" + id + " ]";
+        return "entity.CreditTransaction[ id=" + creditTransactionId + " ]";
     }
     
 }
