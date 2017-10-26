@@ -44,7 +44,7 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         {
             if(ex.getCause() != null && ex.getCause().getCause().getClass().getSimpleName().equals("MySQLIntegrityConstraintViolationException"))
             {
-             throw new EmployeeExistException("Employee with same username already exist");   
+                throw new EmployeeExistException("Employee with same username already exist");   
             }
             else 
             {
