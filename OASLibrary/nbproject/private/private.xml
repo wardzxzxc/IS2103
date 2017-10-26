@@ -6,6 +6,7 @@
             <file>file:/D:/NetBeansProjects/OnlineAuctionSystem(OAS)/OASLibrary/src/entity/AuctionListing.java</file>
             <file>file:/D:/NetBeansProjects/OnlineAuctionSystem(OAS)/OASLibrary/src/entity/Customer.java</file>
             <file>file:/D:/NetBeansProjects/OnlineAuctionSystem(OAS)/OASLibrary/src/entity/Address.java</file>
+            <file>file:/D:/NetBeansProjects/OnlineAuctionSystem(OAS)/OASLibrary/src/ejb/session/stateless/AuctionListingControllerRemote.java</file>
             <file>file:/D:/NetBeansProjects/OnlineAuctionSystem(OAS)/OASLibrary/src/entity/Bid.java</file>
         </group>
     </open-files>
