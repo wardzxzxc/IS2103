@@ -12,6 +12,7 @@ public class MainApp {
     private CreditPackageControllerRemote creditPackageControllerRemote;
     
     private SystemAdministrationModule systemAdministrationModule;
+    private FinanceModule financeModule;
     
     private Employee currentEmployee;
 
@@ -39,6 +40,7 @@ public class MainApp {
                     try {
                         doLogin();
                         systemAdministrationModule = new SystemAdministrationModule(employeeControllerRemote, currentEmployee);
+                        financeModule = new FinanceModule(creditPackageControllerRemote, currentEmployee);
                     }
                     catch(InvalidLoginCredentialException ex) {
                     }

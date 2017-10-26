@@ -1,7 +1,6 @@
 package ejb.session.stateless;
 
 import entity.CreditPackage;
-import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Local;
 import javax.ejb.Remote;
@@ -12,7 +11,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import util.exception.CreditPackageExistException;
 import util.exception.CreditPackageNotFoundException;
-import util.exception.CreditPackageValueChangeException;
 import util.exception.GeneralException;
 
 /**

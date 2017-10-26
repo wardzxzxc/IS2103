@@ -13,7 +13,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import util.exception.EmployeeExistException;
 import util.exception.EmployeeNotFoundException;
-import util.exception.EmployeePasswordChangeException;
 import util.exception.GeneralException;
 import util.exception.InvalidLoginCredentialException;
 
@@ -101,18 +100,6 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         }
         catch (EmployeeNotFoundException ex) {
             throw new InvalidLoginCredentialException("Username does not exist or invalid password");
-        }
-    }
-    
-    @Override
-    public void changePassword(Long employeeId, String currentPassword, String newPassword) throws EmployeeNotFoundException, EmployeePasswordChangeException {
-        
-        Employee employee = retrieveEmployeeByEmployeeId(employeeId);
-        
-        if (employee.getPassword().equals(currentPassword)) {
-            employee.setPassword(newPassword);
-        } else {
-            throw new EmployeePasswordChangeException("Old password keyed in is invalid");
         }
     }
     
