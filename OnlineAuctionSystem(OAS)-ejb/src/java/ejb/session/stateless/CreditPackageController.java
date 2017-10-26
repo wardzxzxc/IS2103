@@ -1,18 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ejb.session.stateless;
 
 import entity.CreditPackage;
 import java.math.BigDecimal;
+import java.util.List;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import util.exception.CreditPackageExistException;
 import util.exception.CreditPackageNotFoundException;
 import util.exception.CreditPackageValueChangeException;
@@ -25,12 +22,11 @@ import util.exception.GeneralException;
 @Stateless
 @Local(CreditPackageControllerLocal.class)
 @Remote(CreditPackageControllerRemote.class)
+
 public class CreditPackageController implements CreditPackageControllerRemote, CreditPackageControllerLocal {
     
     @PersistenceContext(unitName = "OnlineAuctionSystem_OAS_-ejbPU")
     private EntityManager em;
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
     
     @Override
     public CreditPackage createNewCreditPackage(CreditPackage creditPackage) throws CreditPackageExistException, GeneralException {
@@ -50,11 +46,9 @@ public class CreditPackageController implements CreditPackageControllerRemote, C
                     ex.getCause().getCause().getClass().getSimpleName().equals("MySQLIntegrityConstraintViolationException")) 
                     { 
                         throw new CreditPackageExistException("Credit Package with same amount already exist");
-                    
                     }
             else {
-                throw new GeneralException("An unexpected error has occured:" +ex.getMessage());
-                
+                throw new GeneralException("An unexpected error has occured:" + ex.getMessage());
             }
         }
     }
@@ -73,25 +67,27 @@ public class CreditPackageController implements CreditPackageControllerRemote, C
     }
     
     @Override
-    public void changeCreditAmount(BigDecimal newCredit, Long creditPackageId) throws CreditPackageValueChangeException, CreditPackageNotFoundException {
+    public List<CreditPackage> retrieveAllCreditPackage() {
         
-        CreditPackage creditPackage = retrieveCreditPackageById(creditPackageId);
-            
-        if (newCredit.compareTo(BigDecimal.ZERO) > 0) {
-            creditPackage.setCreditPerPackage(newCredit);
-        } else {
-            throw new CreditPackageValueChangeException("Invalid amount to change");
-        }
+        Query query = em.createQuery("SELECT c FROM CreditPackage c");
+        
+        return query.getResultList();
+    }
+        
+    @Override
+    public void updateCreditPackage(CreditPackage creditPackage) {
+        em.merge(creditPackage);
     }
     
     @Override
     public void deleteCreditPackage(Long creditPackageId) throws CreditPackageNotFoundException {
+        
         CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
         
         if (creditPackage != null) {
             em.remove(creditPackage);
         } else {
-            throw new CreditPackageNotFoundException("Credit package does not exist");
+            throw new CreditPackageNotFoundException("Credit Package does not exist");
         }
     } 
     

@@ -29,20 +29,18 @@ public class Customer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
+    @Column(nullable = false, length = 32, unique = true)
+    private String username;
+    @Column(nullable = false, length = 12)
+    private String password;
     @Column(length = 32, nullable = false)
     private String firstName;
     @Column(length = 32, nullable = false)
     private String lastName;
-    @Column(length = 32, nullable = false)
+    @Column(length = 32, nullable = false, unique = true)
     private String contactNumber;
     @Column(nullable = false, precision = 18, scale = 4)
     private BigDecimal creditCurrBalance;
-    @Column(length = 64, nullable = false)
-    private String addressLine1;
-    @Column(length = 64, nullable = false)
-    private String addressLine2;
-    @Column(length = 6, nullable = false)
-    private String postalCode;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<CreditTransaction> creditTransaction;
@@ -50,60 +48,50 @@ public class Customer implements Serializable {
     private List<AuctionListing> auctionsWon;
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Bid> bids;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Address> addresses;
     
     public Customer() {
         this.creditCurrBalance = new BigDecimal("0.0000");
-        
         this.creditTransaction = new ArrayList<>();
         this.auctionsWon = new ArrayList<>();
         this.bids = new ArrayList<>();
-        
+        this.addresses = new ArrayList<>();
     }
-    
-    public Customer(String firstName, String lastName, String contactNumber, String addressLine1, String addressLine2, String postalCode) {
+
+    public Customer(String username, String password, String firstName, String lastName, String contactNumber) {
         this();
+        this.username = username;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.contactNumber = contactNumber;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
-        this.postalCode = postalCode;
     }
 
-    public String getAddressLine2() {
-        return addressLine2;
-    }
-
-    public void setAddressLine2(String addressLine2) {
-        this.addressLine2 = addressLine2;
+    public List<CreditTransaction> getCreditTransaction() {
+        return creditTransaction;
     }
     
     public void setCreditTransaction(List<CreditTransaction> creditTransaction) {
         this.creditTransaction = creditTransaction;
     }
 
-    public void setAuctionsWon(List<AuctionListing> auctionsWon) {
-        this.auctionsWon = auctionsWon;
-    }
-
-    public void setBids(List<Bid> bids) {
-        this.bids = bids;
-    }
-
-    
-    
-    public List<CreditTransaction> getCreditTransaction() {
-        return creditTransaction;
-    }
-
     public List<AuctionListing> getAuctionsWon() {
         return auctionsWon;
+    }
+    
+    public void setAuctionsWon(List<AuctionListing> auctionsWon) {
+        this.auctionsWon = auctionsWon;
     }
 
     public List<Bid> getBids() {
         return bids;
     }
     
+    public void setBids(List<Bid> bids) {
+        this.bids = bids;
+    }
+
     public Long getCustomerId() {
         return customerId;
     }
@@ -111,17 +99,13 @@ public class Customer implements Serializable {
     public void setCustomerId(Long customerId) {
         this.customerId = customerId;
     }
-
-    public String getAddressLine1() {
-        return addressLine1;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }  
     
     public BigDecimal getCreditCurrBalance() {
         return creditCurrBalance;
+    }
+    
+    public void setCreditCurrBalance(BigDecimal creditCurrBalance) {
+        this.creditCurrBalance = creditCurrBalance;
     }
     
     public String getFirstName() {
@@ -135,6 +119,10 @@ public class Customer implements Serializable {
     public String getContactNumber() {
         return contactNumber;
     }
+    
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -142,22 +130,6 @@ public class Customer implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public void setContactNumber(String contactNumber) {
-        this.contactNumber = contactNumber;
-    }
-
-    public void setCreditCurrBalance(BigDecimal creditCurrBalance) {
-        this.creditCurrBalance = creditCurrBalance;
-    }
-
-    public void setAddressLine1(String addressLine1) {
-        this.addressLine1 = addressLine1;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
     }
 
     @Override
@@ -184,6 +156,48 @@ public class Customer implements Serializable {
     @Override
     public String toString() {
         return "entity.Customer[ id=" + customerId + " ]";
+    }
+
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username the username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * @return the addresses
+     */
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
+    /**
+     * @param addresses the addresses to set
+     */
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
     }
     
 }
