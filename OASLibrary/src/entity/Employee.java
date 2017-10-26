@@ -27,8 +27,6 @@ public class Employee implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long employeeId;
     @Column(nullable = false, length = 32, unique = true)
-    private String identificationNumber;
-    @Column(nullable = false, length = 32, unique = true)
     private String username;
     @Column(nullable = false, length = 12)
     private String password;
@@ -129,20 +127,6 @@ public class Employee implements Serializable {
     @Override
     public String toString() {
         return "entity.Employee[ id=" + employeeId + " ]";
-    }
-
-    /**
-     * @return the identificationNumber
-     */
-    public String getIdentificationNumber() {
-        return identificationNumber;
-    }
-
-    /**
-     * @param identificationNumber the identificationNumber to set
-     */
-    public void setIdentificationNumber(String identificationNumber) {
-        this.identificationNumber = identificationNumber;
     }
     
 }
