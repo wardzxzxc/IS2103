@@ -29,6 +29,10 @@ public class Customer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
+    @Column(nullable = false, length = 32, unique = true)
+    private String username;
+    @Column(nullable = false, length = 12)
+    private String password;
     @Column(length = 32, nullable = false)
     private String firstName;
     @Column(length = 32, nullable = false)
@@ -53,15 +57,15 @@ public class Customer implements Serializable {
     
     public Customer() {
         this.creditCurrBalance = new BigDecimal("0.0000");
-        
         this.creditTransaction = new ArrayList<>();
         this.auctionsWon = new ArrayList<>();
         this.bids = new ArrayList<>();
-        
     }
-    
-    public Customer(String firstName, String lastName, String contactNumber, String addressLine1, String addressLine2, String postalCode) {
+
+    public Customer(String username, String password, String firstName, String lastName, String contactNumber, String addressLine1, String addressLine2, String postalCode) {
         this();
+        this.username = username;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.contactNumber = contactNumber;
@@ -184,6 +188,34 @@ public class Customer implements Serializable {
     @Override
     public String toString() {
         return "entity.Customer[ id=" + customerId + " ]";
+    }
+
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username the username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
     }
     
 }
