@@ -11,6 +11,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import util.enumeration.EmployeeAccessRightsEnum;
 import util.exception.EmployeeExistException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.GeneralException;
@@ -104,10 +105,39 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
     }
     
     @Override
-    public void updateEmployee(Employee employee) {
-        em.merge(employee);
+    public void changeFirstName (Employee employee, String newName) {
+        employee.setFirstName(newName);
     }
     
+    @Override
+    public void changeLastName (Employee employee, String newName) {
+        employee.setLastName(newName);
+    }
+    
+    @Override
+    public void changeUserName(Employee employee, String newName) throws EmployeeExistException {
+        try                    //check whether username is in use
+        {
+            Employee check = retrieveEmployeeByUsername(newName);
+            throw new EmployeeExistException("Username is already in use!");      
+        } 
+        catch (EmployeeNotFoundException ex)
+        {
+            if (ex.getCause().getClass().getSimpleName().equals("NoResultException"))
+            employee.setUsername(newName);
+        }
+    }
+    
+    @Override
+    public void changePasswordByAdmin(Employee employee, String password) {
+        employee.setPassword(password);
+    }
+    
+    @Override 
+    public void changeAccessRightEnum(Employee employee, Integer accessRightInt) {
+        employee.setAccessRight(EmployeeAccessRightsEnum.values()[accessRightInt-1]);
+    }
+        
     @Override
     public void deleteEmployee(Long employeeId) throws EmployeeNotFoundException {
         
