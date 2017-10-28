@@ -32,7 +32,7 @@ public class FinanceModule {
     
     public void financeMenu() throws InvalidAccessRightException {
         
-        if(currentEmployee.getAccessRight() != EmployeeAccessRightsEnum.SYSTEMADMIN) {
+        if(currentEmployee.getAccessRight() != EmployeeAccessRightsEnum.FINANCE) {
             throw new InvalidAccessRightException("You don't have FINANCE rights to access the finance module.");
         }
         

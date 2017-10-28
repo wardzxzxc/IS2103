@@ -109,6 +109,13 @@ public class AuctionListingController implements AuctionListingControllerRemote,
     }
     
     @Override
+    public void updateAuctionListing(AuctionListing auctionListing) {
+        
+        em.merge(auctionListing);
+        
+    }
+    
+    @Override
     public void deleteAuctionListing(Long auctionId) throws AuctionListingNotFoundException {
         
         AuctionListing auctionListing = retrieveAuctionListingById(auctionId);
