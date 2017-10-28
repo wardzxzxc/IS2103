@@ -24,8 +24,6 @@ public interface EmployeeControllerRemote {
     
     public Employee employeeLogin(String username, String password) throws InvalidLoginCredentialException;
     
-    public void changePassword(Long employeeId, String currentPassword, String newPassword) throws EmployeeNotFoundException, EmployeePasswordChangeException;
-    
     public void deleteEmployee(Long employeeId) throws EmployeeNotFoundException;
 
     public void updateEmployee(Employee employee);
