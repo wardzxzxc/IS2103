@@ -31,6 +31,11 @@ public class Address implements Serializable {
     @JoinColumn(nullable = false)
     private Customer customer;
 
+    public Address() {
+    }
+    
+    
+
     public Address(String addressLine1, String addressLine2, String postalCode, Customer customer) {
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
