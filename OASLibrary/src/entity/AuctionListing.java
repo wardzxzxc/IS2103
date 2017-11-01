@@ -48,7 +48,7 @@ public class AuctionListing implements Serializable {
     private Date endDateTime;
     
     @ManyToOne
-    private Customer customerWon;
+    private Customer customer;
     @OneToMany(mappedBy = "auctionListing", cascade = CascadeType.ALL)
     private List<Bid> bids;
     
@@ -56,26 +56,26 @@ public class AuctionListing implements Serializable {
         this.bids = new ArrayList<>();
     }
 
-    public AuctionListing(BigDecimal reservePrice, BigDecimal currentHighestPrice , String productName, Boolean active, Date startDateTime, Date endDateTime) {
+    public AuctionListing(BigDecimal reservePrice, String productName, Date startDateTime, Date endDateTime) {
         this();
-        this.currentHighestPrice = currentHighestPrice;
+        this.currentHighestPrice = BigDecimal.ZERO;
         this.reservePrice = reservePrice;
         this.productName = productName;
-        this.active = active;
+        this.active = false;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
-    public void setCustomerWon(Customer customerWon) {
-        this.customerWon = customerWon;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     public void setBids(List<Bid> bids) {
         this.bids = bids;
     }
     
-    public Customer getCustomerWon() {
-        return customerWon;
+    public Customer getCustomer() {
+        return customer;
     }
 
     public List<Bid> getBids() {

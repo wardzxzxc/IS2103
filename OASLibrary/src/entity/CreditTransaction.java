@@ -39,6 +39,11 @@ public class CreditTransaction implements Serializable {
     @JoinColumn(nullable = false)
     private Customer customer;
 
+    public CreditTransaction() {
+    }
+    
+    
+
     public CreditTransaction(Date transactionDateTime, BigDecimal amount, Customer customer) {
         this.transactionDateTime = transactionDateTime;
         this.amount = amount;

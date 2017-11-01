@@ -31,12 +31,27 @@ public class Address implements Serializable {
     @JoinColumn(nullable = false)
     private Customer customer;
 
+    public Address() {
+    }
+    
+    
+
     public Address(String addressLine1, String addressLine2, String postalCode, Customer customer) {
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
         this.postalCode = postalCode;
         this.customer = customer;
     }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+    
+    
 
     public Long getAddressId() {
         return addressId;
