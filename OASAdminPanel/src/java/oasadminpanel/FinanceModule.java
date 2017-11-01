@@ -30,11 +30,8 @@ public class FinanceModule {
         this.currentEmployee = currentEmployee;
     }
     
-    public void financeMenu() throws InvalidAccessRightException {
+    public void financeMenu() {
         
-        if(currentEmployee.getAccessRight() != EmployeeAccessRightsEnum.SYSTEMADMIN) {
-            throw new InvalidAccessRightException("You don't have FINANCE rights to access the finance module.");
-        }
         
         Scanner sc = new Scanner(System.in);
         Integer response = 0;

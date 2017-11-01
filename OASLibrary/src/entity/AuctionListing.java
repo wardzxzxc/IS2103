@@ -56,12 +56,12 @@ public class AuctionListing implements Serializable {
         this.bids = new ArrayList<>();
     }
 
-    public AuctionListing(BigDecimal reservePrice, BigDecimal currentHighestPrice , String productName, Boolean active, Date startDateTime, Date endDateTime) {
+    public AuctionListing(BigDecimal reservePrice, String productName, Date startDateTime, Date endDateTime) {
         this();
-        this.currentHighestPrice = currentHighestPrice;
+        this.currentHighestPrice = BigDecimal.ZERO;
         this.reservePrice = reservePrice;
         this.productName = productName;
-        this.active = active;
+        this.active = false;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
