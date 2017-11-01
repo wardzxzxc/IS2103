@@ -32,7 +32,6 @@ public class FinanceModule {
     
     public void financeMenu() {
         
-        
         Scanner sc = new Scanner(System.in);
         Integer response = 0;
         
