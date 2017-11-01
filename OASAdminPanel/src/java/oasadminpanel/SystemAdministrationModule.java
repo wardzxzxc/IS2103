@@ -28,11 +28,7 @@ public class SystemAdministrationModule {
         this.currentEmployee = currentEmployee;
     }
     
-    public void systemAdministrationMenu() throws InvalidAccessRightException, EmployeeExistException {
-        
-        if(currentEmployee.getAccessRight() != EmployeeAccessRightsEnum.SYSTEMADMIN) {
-            throw new InvalidAccessRightException("You don't have SYSTEMADMIN rights to access the system administration module.");
-        }
+    public void systemAdministrationMenu() throws EmployeeExistException {
         
         Scanner sc = new Scanner(System.in);
         Integer response = 0;
@@ -265,7 +261,7 @@ public class SystemAdministrationModule {
         String input;
         
         System.out.println("*** OAS Admin Panel :: System Administration :: View Employee Details :: Delete Employee ***\n");
-        System.out.printf("Confirm Delete Employee %s %s (Employee ID: %d) (Enter 'Y' to Delete)> ", employee.getFirstName(), employee.getLastName(), employee.getEmployeeId());
+        System.out.printf("Confirm Delete Employee %s %s (Employee ID: %d) (Enter 'Y' to Delete) (Enter 'N' to Cancel and return to Update Employee menu) ", employee.getFirstName(), employee.getLastName(), employee.getEmployeeId());
         input = sc.nextLine().trim();
         
         if(input.equals("Y"))
@@ -280,9 +276,12 @@ public class SystemAdministrationModule {
                 System.out.println("An error has occurred while deleting employee: " + ex.getMessage() + "\n");
             }            
         }
-        else
+        else if (input.equals("N"))
         {
             System.out.println("Employee NOT deleted!\n");
+        }
+        else {
+            System.out.println("Please key in a valid option!");
         }
         
     }

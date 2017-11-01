@@ -4,6 +4,7 @@ import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.EmployeeControllerRemote;
 import entity.Employee;
 import java.util.Scanner;
+import util.enumeration.EmployeeAccessRightsEnum;
 import util.exception.InvalidLoginCredentialException;
 
 public class MainApp {
@@ -17,6 +18,13 @@ public class MainApp {
     private Employee currentEmployee;
 
     public MainApp() {
+    }
+
+    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote) {
+        this.creditPackageControllerRemote = creditPackageControllerRemote;
+        
+//        this.systemAdministrationModule = systemAdministrationModule;
+//        this.financeModule = financeModule;
     }
     
     public void runApp() {
@@ -39,8 +47,12 @@ public class MainApp {
                     
                     try {
                         doLogin();
-                        systemAdministrationModule = new SystemAdministrationModule(employeeControllerRemote, currentEmployee);
-                        financeModule = new FinanceModule(creditPackageControllerRemote, currentEmployee);
+                        if (currentEmployee.getAccessRight() == EmployeeAccessRightsEnum.SYSTEMADMIN) {
+                            systemAdministrationModule = new SystemAdministrationModule(employeeControllerRemote, currentEmployee);
+                        }
+                        else {
+                            financeModule = new FinanceModule(creditPackageControllerRemote, currentEmployee);
+                        }
                     }
                     catch(InvalidLoginCredentialException ex) {
                     }

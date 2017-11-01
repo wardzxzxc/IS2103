@@ -119,7 +119,9 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         try                    //check whether username is in use
         {
             Employee check = retrieveEmployeeByUsername(newName);
-            throw new EmployeeExistException("Username is already in use!");      
+            if (check != null) {
+                throw new EmployeeExistException("Username is already in use!");
+            }
         } 
         catch (EmployeeNotFoundException ex)
         {

@@ -14,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) {
         
-        MainApp mainApp = new MainApp();
+        MainApp mainApp = new MainApp(employeeControllerRemote, creditPackageControllerRemote);
         mainApp.runApp();
         
     }
