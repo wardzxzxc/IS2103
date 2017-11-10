@@ -34,4 +34,6 @@ public interface AuctionListingControllerRemote {
     
     public void updateAuctionListing(AuctionListing auctionListing);
     
+    public Bid findLargestBid(AuctionListing auctionListing);
+    
 }

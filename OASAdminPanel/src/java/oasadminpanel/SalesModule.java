@@ -1,7 +1,10 @@
 package oasadminpanel;
 
 import ejb.session.stateless.AuctionListingControllerRemote;
+import ejb.session.stateless.EmployeeControllerRemote;
 import entity.AuctionListing;
+import entity.Bid;
+import entity.Customer;
 import entity.Employee;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -9,11 +12,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Scanner;
-import util.enumeration.EmployeeAccessRightsEnum;
 import util.exception.AuctionListingExistException;
 import util.exception.AuctionListingNotFoundException;
 import util.exception.GeneralException;
-import util.exception.InvalidAccessRightException;
+import util.exception.PasswordDoesNotMatchException;
 
 /**
  *
@@ -22,6 +24,7 @@ import util.exception.InvalidAccessRightException;
 public class SalesModule {
     
     private AuctionListingControllerRemote auctionListingControllerRemote;
+    private EmployeeControllerRemote employeeControllerRemote;
     
     private Employee currentEmployee;
 
@@ -33,11 +36,7 @@ public class SalesModule {
         this.currentEmployee = currentEmployee;
     }
     
-    public void salesMenu() throws InvalidAccessRightException {
-        
-        if(currentEmployee.getAccessRight() != EmployeeAccessRightsEnum.SALES) {
-            throw new InvalidAccessRightException("You don't have SALES rights to access the sales module.");
-        }
+    public void salesMenu() {
         
         Scanner sc = new Scanner(System.in);
         Integer response = 0;
@@ -48,10 +47,11 @@ public class SalesModule {
             System.out.println("2: View Auction Listing Details");
             System.out.println("3: View All Auction Listings");
             System.out.println("4: View All Auction Listings with Bids but Below Reserve Price");
-            System.out.println("5: Back\n");
+            System.out.println("5: Change My Password");
+            System.out.println("6: Back\n");
             response = 0;
             
-            while(response < 1 || response > 5) {
+            while(response < 1 || response > 6) {
                 System.out.println("> ");
                 
                 response = sc.nextInt();
@@ -69,6 +69,9 @@ public class SalesModule {
                     doViewAllAuctionListingsBelowReserve();
                 }
                 else if(response == 5) {
+                    doChangeMyPassword(currentEmployee);
+                }
+                else if (response == 60) {
                     break;
                 }
                 else {
@@ -76,7 +79,7 @@ public class SalesModule {
                 }
             }
             
-            if(response == 5) {
+            if(response == 6) {
                 break;
             }
         }
@@ -297,8 +300,71 @@ public class SalesModule {
             }
         }
         
-        System.out.print("Press any key to continue...> ");
+        Integer response = 0;
+        
+        while (true) {
+            System.out.println("1: Manually Assign Winning Bid");
+            System.out.println("2: Back\n");
+            response = 0;
+            
+            
+            while (response < 1 || response > 2) {
+                System.out.println(">");
+                response = sc.nextInt();
+                
+                if (response == 1) {
+                    doManualAssign();
+                } else if (response == 2) {
+                    break;
+                } else {
+                    System.out.println("Invalid option! Please try again!");
+                }
+            }
+            
+            if (response == 2) {
+                break;
+            }
+        }
+    }
+    
+    private void doChangeMyPassword(Employee employee) {
+        
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Admin Panel :: Sales :: Change My Password ***\n");
+        System.out.println("Enter old password> ");
+        String oldPassword = sc.next().trim();
+        System.out.println("Enter new password> ");
+        String newPassword = sc.next().trim();
+        
+        try {
+            employeeControllerRemote.changeMyPassword(employee, newPassword, oldPassword);
+            System.out.println("Password successfully changed!");
+        } catch (PasswordDoesNotMatchException ex) {
+            System.out.println("Error message: " + ex.getMessage() +  "\n");
+        }
+        
+    }
+    
+    private void doManualAssign() {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Admin Panel :: Sales :: View All Auction Listings Below Reserve Price :: Manually Assign Winning Bid ***\n");
+        System.out.println("Enter Auction ID >");
+        Long auctionId = sc.nextLong();
         sc.nextLine();
+        
+        AuctionListing auctionListing = new AuctionListing();
+        try {
+            auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionId);
+            Bid highestBid = auctionListingControllerRemote.findLargestBid(auctionListing);
+            Customer customer = highestBid.getCustomer();
+            auctionListing.setWinner(customer);
+            customer.getAuctionsWon().add(auctionListing);
+            auctionListing.setActive(false);
+        } catch (AuctionListingNotFoundException ex) {
+            System.out.println("An error has occurred while assigning winning bid " + ex.getMessage() + "\n");
+        }
         
     }
     

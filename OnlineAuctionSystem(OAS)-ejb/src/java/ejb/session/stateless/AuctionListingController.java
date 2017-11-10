@@ -8,6 +8,7 @@ package ejb.session.stateless;
 import entity.AuctionListing;
 import entity.Bid;
 import static entity.Employee_.employeeId;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Local;
 import javax.ejb.Remote;
@@ -125,6 +126,22 @@ public class AuctionListingController implements AuctionListingControllerRemote,
         } else {
             throw new AuctionListingNotFoundException("Auction ID " + employeeId + "does not exist");
         }   
+    }
+    
+    @Override   
+    public Bid findLargestBid(AuctionListing auctionListing) {
+        List<Bid> bids = auctionListing.getBids();
+        Bid highestBid = new Bid();
+        BigDecimal highestBidAmount = BigDecimal.ZERO;
+            
+        for (Bid bid : bids) {
+            if (bid.getAmount().compareTo(highestBidAmount) > 0) {
+                highestBid = bid;
+                highestBidAmount = bid.getAmount();
+            }
+        }
+        
+        return highestBid;
     }
     
     

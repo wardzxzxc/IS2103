@@ -48,7 +48,7 @@ public class AuctionListing implements Serializable {
     private Date endDateTime;
     
     @ManyToOne
-    private Customer customer;
+    private Customer winner;
     @OneToMany(mappedBy = "auctionListing", cascade = CascadeType.ALL)
     private List<Bid> bids;
     
@@ -66,16 +66,16 @@ public class AuctionListing implements Serializable {
         this.endDateTime = endDateTime;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setWinner(Customer winner) {
+        this.winner = winner;
     }
 
     public void setBids(List<Bid> bids) {
         this.bids = bids;
     }
     
-    public Customer getCustomer() {
-        return customer;
+    public Customer getWinner() {
+        return winner;
     }
 
     public List<Bid> getBids() {

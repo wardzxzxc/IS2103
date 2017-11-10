@@ -11,11 +11,11 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
-import util.enumeration.EmployeeAccessRightsEnum;
 import util.exception.EmployeeExistException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.GeneralException;
 import util.exception.InvalidLoginCredentialException;
+import util.exception.PasswordDoesNotMatchException;
 
 /**
  *
@@ -105,39 +105,9 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
     }
     
     @Override
-    public void changeFirstName (Employee employee, String newName) {
-        employee.setFirstName(newName);
-    }
-    
-    @Override
-    public void changeLastName (Employee employee, String newName) {
-        employee.setLastName(newName);
-    }
-    
-    @Override
-    public void changeUserName(Employee employee, String newName) throws EmployeeExistException {
-        try                    //check whether username is in use
-        {
-            Employee check = retrieveEmployeeByUsername(newName);
-            if (check != null) {
-                throw new EmployeeExistException("Username is already in use!");
-            }
-        } 
-        catch (EmployeeNotFoundException ex)
-        {
-            if (ex.getCause().getClass().getSimpleName().equals("NoResultException"))
-            employee.setUsername(newName);
-        }
-    }
-    
-    @Override
-    public void changePasswordByAdmin(Employee employee, String password) {
-        employee.setPassword(password);
-    }
-    
-    @Override 
-    public void changeAccessRightEnum(Employee employee, Integer accessRightInt) {
-        employee.setAccessRight(EmployeeAccessRightsEnum.values()[accessRightInt-1]);
+    public void updateEmployee(Employee employee) {
+        
+        em.merge(employee);
     }
         
     @Override
@@ -150,5 +120,16 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         } else {
             throw new EmployeeNotFoundException("Employee ID " + employeeId + "does not exist");
         }   
+    }
+    
+    @Override
+    public void changeMyPassword(Employee employee, String newPassword, String oldPassword) throws PasswordDoesNotMatchException {
+        if (employee.getPassword().equals(oldPassword)) {
+            employee.setPassword(newPassword);
+        } else {
+            throw new PasswordDoesNotMatchException("Current password is invalid");
+        }
+        
+        updateEmployee(employee);
     }
 }

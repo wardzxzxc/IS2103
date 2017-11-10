@@ -1,16 +1,16 @@
 package oasadminpanel;
 
 import ejb.session.stateless.CreditPackageControllerRemote;
+import ejb.session.stateless.EmployeeControllerRemote;
 import entity.CreditPackage;
 import entity.Employee;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
-import util.enumeration.EmployeeAccessRightsEnum;
 import util.exception.CreditPackageExistException;
 import util.exception.CreditPackageNotFoundException;
 import util.exception.GeneralException;
-import util.exception.InvalidAccessRightException;
+import util.exception.PasswordDoesNotMatchException;
 
 /**
  *
@@ -19,6 +19,7 @@ import util.exception.InvalidAccessRightException;
 public class FinanceModule {
     
     private CreditPackageControllerRemote creditPackageControllerRemote;
+    private EmployeeControllerRemote employeeControllerRemote;
     
     private Employee currentEmployee;
 
@@ -40,10 +41,11 @@ public class FinanceModule {
             System.out.println("1: Create Credit Package");
             System.out.println("2: View Credit Package Details");
             System.out.println("3: View All Credit Packages");
-            System.out.println("4: Back\n");
+            System.out.println("4: Change My Password");
+            System.out.println("5: Back\n");
             response = 0;
             
-            while(response < 1 || response > 4) {
+            while(response < 1 || response > 5) {
                 System.out.println("> ");
                 
                 response = sc.nextInt();
@@ -58,6 +60,9 @@ public class FinanceModule {
                     doViewAllCreditPackages();
                 }
                 else if(response == 4) {
+                    doChangeMyPassword(currentEmployee);
+                }
+                else if (response == 5) {
                     break;
                 }
                 else {
@@ -65,7 +70,7 @@ public class FinanceModule {
                 }
             }
             
-            if(response == 4) {
+            if(response == 5) {
                 break;
             }
         }
@@ -99,6 +104,7 @@ public class FinanceModule {
         System.out.println("*** OAS Admin Panel :: Finance :: View Credit Package Details ***\n");
         System.out.print("Enter Credit Package ID> ");
         Long creditPackageId = sc.nextLong();
+        sc.nextLine();
         
         try
         {
@@ -208,6 +214,25 @@ public class FinanceModule {
         else
         {
             System.out.println("Credit package NOT deleted!\n");
+        }
+        
+    }
+    
+        private void doChangeMyPassword(Employee employee) {
+        
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Admin Panel :: Finance :: Change My Password ***\n");
+        System.out.println("Enter old password> ");
+        String oldPassword = sc.next().trim();
+        System.out.println("Enter new password> ");
+        String newPassword = sc.next().trim();
+        
+        try {
+            employeeControllerRemote.changeMyPassword(employee, newPassword, oldPassword);
+            System.out.println("Password successfully changed!");
+        } catch (PasswordDoesNotMatchException ex) {
+            System.out.println("Error message: " + ex.getMessage() + "\n");
         }
         
     }

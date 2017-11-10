@@ -7,6 +7,7 @@ import util.exception.EmployeeNotFoundException;
 import util.exception.EmployeePasswordChangeException;
 import util.exception.GeneralException;
 import util.exception.InvalidLoginCredentialException;
+import util.exception.PasswordDoesNotMatchException;
 
 /**
  *
@@ -26,14 +27,8 @@ public interface EmployeeControllerLocal {
 
     public void deleteEmployee(Long employeeId) throws EmployeeNotFoundException;
 
-    public void changeFirstName(Employee employee, String newName);
+    public void updateEmployee(Employee employee);
 
-    public void changeLastName(Employee employee, String newName);
-
-    public void changeUserName(Employee employee, String newName) throws EmployeeExistException;
-
-    public void changePasswordByAdmin(Employee employee, String password);
-
-    public void changeAccessRightEnum(Employee employee, Integer accessRightInt);
+    public void changeMyPassword(Employee employee, String newPassword, String oldPassword) throws PasswordDoesNotMatchException;
 
 }

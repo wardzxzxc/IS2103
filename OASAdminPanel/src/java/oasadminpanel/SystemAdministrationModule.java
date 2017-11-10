@@ -8,7 +8,7 @@ import util.enumeration.EmployeeAccessRightsEnum;
 import util.exception.EmployeeExistException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.GeneralException;
-import util.exception.InvalidAccessRightException;
+import util.exception.PasswordDoesNotMatchException;
 
 /**
  *
@@ -28,7 +28,7 @@ public class SystemAdministrationModule {
         this.currentEmployee = currentEmployee;
     }
     
-    public void systemAdministrationMenu() throws EmployeeExistException {
+    public void systemAdministrationMenu() {
         
         Scanner sc = new Scanner(System.in);
         Integer response = 0;
@@ -38,10 +38,11 @@ public class SystemAdministrationModule {
             System.out.println("1: Create New Employee");
             System.out.println("2: View Employee Details");
             System.out.println("3: View All Employees");
-            System.out.println("4: Back\n");
+            System.out.println("4: Change My Password");
+            System.out.println("5: Back\n");
             response = 0;
             
-            while(response < 1 || response > 4) {
+            while(response < 1 || response > 5) {
                 System.out.println("> ");
                 
                 response = sc.nextInt();
@@ -56,6 +57,9 @@ public class SystemAdministrationModule {
                     doViewAllEmployees();
                 }
                 else if(response == 4) {
+                    doChangeMyPassword(currentEmployee);
+                }
+                else if (response == 5) {
                     break;
                 }
                 else {
@@ -63,7 +67,7 @@ public class SystemAdministrationModule {
                 }
             }
             
-            if(response == 4) {
+            if(response == 5) {
                 break;
             }
         }
@@ -109,14 +113,15 @@ public class SystemAdministrationModule {
                 newEmployee = employeeControllerRemote.createNewEmployee(newEmployee);
                 break;
             }
-            catch(EmployeeExistException | GeneralException ex) { //if employee exists, it makes sense to try again to key in a new username, but if its a general exception, i dont think they should redo the while creation of employee process
+            catch(EmployeeExistException | GeneralException ex) {
+                System.out.println("An error occurred :" + ex.getMessage() + "\n");//if employee exists, it makes sense to try again to key in a new username, but if its a general exception, i dont think they should redo the while creation of employee process
             }
         }
         
         System.out.println("New employee created successfully!: " + newEmployee.getEmployeeId() + "\n");
     }
     
-    private void doViewEmployeeDetails() throws EmployeeExistException {
+    private void doViewEmployeeDetails() {
         
         Scanner sc = new Scanner(System.in);
         Integer response = 0;
@@ -126,6 +131,7 @@ public class SystemAdministrationModule {
         Long employeeId = sc.nextLong();
         
         while (true) {
+            
             try
             {
                 Employee employee = employeeControllerRemote.retrieveEmployeeByEmployeeId(employeeId);
@@ -135,6 +141,7 @@ public class SystemAdministrationModule {
                 System.out.println("1: Update Employee");
                 System.out.println("2: Delete Employee");
                 System.out.println("3: Back\n");
+                response = 0;
 
                 while(response < 1 || response > 3)
                 {
@@ -145,6 +152,7 @@ public class SystemAdministrationModule {
                     if(response == 1)
                     {
                         doUpdateEmployee(employee);
+                        
                     }
                     else if(response == 2)
                     {
@@ -171,9 +179,11 @@ public class SystemAdministrationModule {
         }
     }
     
-    private void doUpdateEmployee (Employee employee) throws EmployeeExistException {
+    private void doUpdateEmployee (Employee employee) {
         
-        Scanner sc = new Scanner(System.in);        
+        Scanner sc = new Scanner(System.in);   
+        
+        Integer response = 0;
         
         while (true) {
             
@@ -181,13 +191,10 @@ public class SystemAdministrationModule {
             System.out.println("1: Edit First Name");
             System.out.println("2: Edit Last Name");
             System.out.println("3: Edit Access Right");
-            System.out.println("4: Edit Username");
-            System.out.println("5: Edit Password");
-            System.out.println("6: Back\n");
+            System.out.println("4: Edit Password");
+            System.out.println("5: Back\n");
             
-            Integer response = 0;
-            
-            response = sc.nextInt();
+            response = 0;
             
             while(response < 1 || response > 6) {
                 
@@ -195,58 +202,66 @@ public class SystemAdministrationModule {
                 
                 response = sc.nextInt();
                 
-                if (response == 1) 
-                {
-                   String newFirstName = sc.next();
-                   employeeControllerRemote.changeFirstName(employee, newFirstName);
+                if (response == 1) {
+                   String newFirstName = sc.next().trim();
+                   employee.setFirstName(newFirstName);
+                   employeeControllerRemote.updateEmployee(employee);
                    System.out.println("Employee's First Name updated successfully!\n");
                 }
                 else if (response == 2) {
-                   String newLastName = sc.next();
-                   employeeControllerRemote.changeLastName(employee, newLastName);
+                   String newLastName = sc.next().trim();
+                   employee.setLastName(newLastName);
+                   employeeControllerRemote.updateEmployee(employee);
                    System.out.println("Employee's Last Name updated successfully!\n"); 
                 }
                 else if (response == 3) {
                     
-                     while(true)
-                     {
+                    Integer enumResponse = 0;
+                    
+                     while(true) {
                         System.out.print("Select Access Right (1: Finance, 2: Sales, 3: System Admin, 4: Back\n)> ");
-                        Integer accessRightInt = sc.nextInt();
+                        enumResponse = 0;
+                        
+                        while (enumResponse < 1 || enumResponse > 4) {
+                            System.out.println(">");                           
+                            enumResponse = sc.nextInt();
 
-                        if(accessRightInt >= 1 && accessRightInt <= 3)
-                        {
-                            employee.setAccessRight(EmployeeAccessRightsEnum.values()[accessRightInt-1]);
-                            System.out.println("Employee's Access Right updated successfully!\n");
+                            if(enumResponse >= 1 && enumResponse <= 3)
+                            {
+                                employee.setAccessRight(EmployeeAccessRightsEnum.values()[enumResponse-1]);
+                                employeeControllerRemote.updateEmployee(employee);
+                                System.out.println("Employee's Access Right updated successfully!\n");
+                                break;
+                            }
+                            else if (enumResponse == 4)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                System.out.println("Invalid option, please try again!\n");
+                            }
+                        }
+                        if (enumResponse == 4) {
                             break;
                         }
-                        else if (accessRightInt == 4)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            System.out.println("Invalid option, please try again!\n");
-                        }
-                     } 
+                     }
                 }
                 else if (response == 4) {
-                   String newUsername = sc.next();
-                   employeeControllerRemote.changeUserName(employee, newUsername);
-                   System.out.println("Employee's Username updated successfully!\n"); 
-                }
-                else if (response == 5) {
-                    String newPassword = sc.next();
-                    employeeControllerRemote.changePasswordByAdmin(employee, newPassword);
+                    String newPassword = sc.next().trim();
+                    employee.setPassword(newPassword);
+                    employeeControllerRemote.updateEmployee(employee);
                     System.out.println("Employee's Password updated successfully!\n"); 
                 }
-                else if (response == 6) {
+                else if (response == 5) {
                     break;
                 }
                 else {
                     System.out.println("Invalid option, please try again\n!");
                 }
             }
-            if (response == 6)
+            
+            if (response == 5)
             {
                 break;
             }
@@ -302,6 +317,25 @@ public class SystemAdministrationModule {
         
         System.out.print("Press any key to continue...> ");
         sc.nextLine();
+        
+    }
+    
+        private void doChangeMyPassword(Employee employee) {
+        
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Admin Panel :: System Administration :: Change My Password ***\n");
+        System.out.println("Enter old password> ");
+        String oldPassword = sc.next().trim();
+        System.out.println("Enter new password> ");
+        String newPassword = sc.next().trim();
+        
+        try {
+            employeeControllerRemote.changeMyPassword(employee, newPassword, oldPassword);
+            System.out.println("Password successfully changed!");
+        } catch (PasswordDoesNotMatchException ex) {
+            System.out.println("Error message: " + ex.getMessage() + "\n");
+        }
         
     }
     

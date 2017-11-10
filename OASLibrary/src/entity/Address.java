@@ -51,7 +51,6 @@ public class Address implements Serializable {
         this.customer = customer;
     }
     
-    
 
     public Long getAddressId() {
         return addressId;

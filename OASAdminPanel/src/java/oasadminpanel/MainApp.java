@@ -1,5 +1,6 @@
 package oasadminpanel;
 
+import ejb.session.stateless.AuctionListingControllerRemote;
 import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.EmployeeControllerRemote;
 import entity.Employee;
@@ -11,21 +12,23 @@ public class MainApp {
     
     private EmployeeControllerRemote employeeControllerRemote;
     private CreditPackageControllerRemote creditPackageControllerRemote;
+    private AuctionListingControllerRemote auctionListingControllerRemote;
     
     private SystemAdministrationModule systemAdministrationModule;
     private FinanceModule financeModule;
+    private SalesModule salesModule;
     
     private Employee currentEmployee;
 
     public MainApp() {
     }
 
-    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote) {
+    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote) {
+        this.employeeControllerRemote = employeeControllerRemote;
         this.creditPackageControllerRemote = creditPackageControllerRemote;
-        
-//        this.systemAdministrationModule = systemAdministrationModule;
-//        this.financeModule = financeModule;
+        this.auctionListingControllerRemote = auctionListingControllerRemote;
     }
+    
     
     public void runApp() {
         
@@ -49,9 +52,14 @@ public class MainApp {
                         doLogin();
                         if (currentEmployee.getAccessRight() == EmployeeAccessRightsEnum.SYSTEMADMIN) {
                             systemAdministrationModule = new SystemAdministrationModule(employeeControllerRemote, currentEmployee);
+                            systemAdministrationModule.systemAdministrationMenu();
                         }
-                        else {
+                        else if (currentEmployee.getAccessRight() == EmployeeAccessRightsEnum.FINANCE) {
                             financeModule = new FinanceModule(creditPackageControllerRemote, currentEmployee);
+                            financeModule.financeMenu();
+                        } else {
+                            salesModule = new SalesModule(auctionListingControllerRemote, currentEmployee);
+                            salesModule.salesMenu();
                         }
                     }
                     catch(InvalidLoginCredentialException ex) {
@@ -86,7 +94,7 @@ public class MainApp {
         if(username.length() > 0 && password.length() > 0)
         {
             try
-            {
+            {                   
                 currentEmployee = employeeControllerRemote.employeeLogin(username, password);
                 System.out.println("Login successful!\n");
             }        

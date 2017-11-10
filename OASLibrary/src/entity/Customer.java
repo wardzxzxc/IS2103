@@ -44,7 +44,7 @@ public class Customer implements Serializable {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<CreditTransaction> creditTransaction;
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "winner")
     private List<AuctionListing> auctionsWon;
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Bid> bids;
