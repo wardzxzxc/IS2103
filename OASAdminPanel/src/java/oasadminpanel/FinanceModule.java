@@ -42,7 +42,7 @@ public class FinanceModule {
             System.out.println("2: View Credit Package Details");
             System.out.println("3: View All Credit Packages");
             System.out.println("4: Change My Password");
-            System.out.println("5: Back\n");
+            System.out.println("5: Logout\n");
             response = 0;
             
             while(response < 1 || response > 5) {

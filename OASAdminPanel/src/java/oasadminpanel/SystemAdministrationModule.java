@@ -39,7 +39,7 @@ public class SystemAdministrationModule {
             System.out.println("2: View Employee Details");
             System.out.println("3: View All Employees");
             System.out.println("4: Change My Password");
-            System.out.println("5: Back\n");
+            System.out.println("5: Logout\n");
             response = 0;
             
             while(response < 1 || response > 5) {

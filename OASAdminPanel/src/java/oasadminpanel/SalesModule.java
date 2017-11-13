@@ -97,28 +97,30 @@ public class SalesModule {
         DateFormat df = new SimpleDateFormat("dd/mm/yyyy, HH:mm");
         
         while(true) {
-            System.out.println("Enter Auction Start Time (Format: ddmmyyyy, HHmm)> ");
+            System.out.println("Enter Auction Start Time (Format: dd/mm/yyyy, HH:mm)> ");
             String startDateTime = sc.nextLine().trim();
             
             try {
                 newAuctionListing.setStartDateTime(df.parse(startDateTime));
-                System.out.println("Start Time: " + df.format(startDateTime));
+                System.out.println("Start Time: " + startDateTime);
                 break;
             }
             catch (ParseException ex) {
+                System.out.println("Please key in the date in the given format");
             }
         }
         
         while(true) {
-            System.out.println("Enter Auction End Time (Format: ddmmyyyy, HHmm)> ");
+            System.out.println("Enter Auction End Time (Format: dd/mm/yyyy, HH:mm)> ");
             String endDateTime = sc.nextLine().trim();
             
             try {
                 newAuctionListing.setEndDateTime(df.parse(endDateTime));
-                System.out.println("End Time: " + df.format(endDateTime));
+                System.out.println("End Time: " + endDateTime);
                 break;
             }
             catch (ParseException ex) {
+                System.out.println("Please key in the date in the given format");
             }
         }
         
@@ -134,11 +136,13 @@ public class SalesModule {
         
         try {
             newAuctionListing = auctionListingControllerRemote.createNewAuctionListing(newAuctionListing);
+            System.out.println("New auction listing created successfully!: " + newAuctionListing.getAuctionListingId() + "\n");
         }
         catch (AuctionListingExistException | GeneralException ex) {
+            System.out.println("An error occurred " + ex.getMessage());
         }
         
-        System.out.println("New auction listing created successfully!: " + newAuctionListing.getAuctionListingId() + "\n");
+        
     }
     
     private void doViewAuctionListingDetails() {
@@ -160,7 +164,7 @@ public class SalesModule {
             System.out.println("------------------------");
             System.out.println("1: Update Auction Listing");
             System.out.println("2: Delete Auction Listing");
-            System.out.println("3: Back\n");
+            System.out.println("3: Logout\n");
             System.out.print("> ");
             response = sc.nextInt();
 
@@ -196,12 +200,12 @@ public class SalesModule {
         DateFormat df = new SimpleDateFormat("dd/mm/yyyy, HH:mm");
         
         while(true) {
-            System.out.println("Enter Auction Start Time (Format: ddmmyyyy, HHmm)> ");
+            System.out.println("Enter Auction Start Time (Format: dd/mm/yyyy, HH:mm)> ");
             input = sc.nextLine().trim();
             
             try {
                 auctionListing.setStartDateTime(df.parse(input));
-                System.out.println("Start Time: " + df.format(input));
+                System.out.println("Start Time: " + input);
                 break;
             }
             catch (ParseException ex) {
@@ -209,12 +213,12 @@ public class SalesModule {
         }
         
         while(true) {
-            System.out.println("Enter Auction End Time (Format: ddmmyyyy, HHmm)> ");
+            System.out.println("Enter Auction End Time (Format: dd/mm/yyyy, HH:mm)> ");
             input = sc.nextLine().trim();
             
             try {
                 auctionListing.setEndDateTime(df.parse(input));
-                System.out.println("End Time: " + df.format(input));
+                System.out.println("End Time: " + input);
                 break;
             }
             catch (ParseException ex) {

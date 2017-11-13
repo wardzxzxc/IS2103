@@ -47,13 +47,14 @@ public class AuctionListing implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDateTime;
     
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Customer winner;
-    @OneToMany(mappedBy = "auctionListing", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "auctionListing")
     private List<Bid> bids;
     
     public AuctionListing() {        
-        this.bids = new ArrayList<>();
+        bids = new ArrayList<>();
+        active = false;
     }
 
     public AuctionListing(BigDecimal reservePrice, String productName, Date startDateTime, Date endDateTime) {
@@ -61,9 +62,10 @@ public class AuctionListing implements Serializable {
         this.currentHighestPrice = BigDecimal.ZERO;
         this.reservePrice = reservePrice;
         this.productName = productName;
-        this.active = false;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
+        this.active = false;
+      
     }
 
     public void setWinner(Customer winner) {

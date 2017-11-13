@@ -55,7 +55,7 @@ public class AuctionListingController implements AuctionListingControllerRemote,
                     ex.getCause().getCause() != null &&
                     ex.getCause().getCause().getClass().getSimpleName().equals("MySQLIntegrityConstraintViolationException")) 
                     { 
-                        throw new AuctionListingExistException("Customer already exists");
+                        throw new AuctionListingExistException("Auction listing already exists");
                     }
             else {
                 throw new GeneralException("An unexpected error has occured:" + ex.getMessage());
@@ -130,16 +130,9 @@ public class AuctionListingController implements AuctionListingControllerRemote,
     
     @Override   
     public Bid findLargestBid(AuctionListing auctionListing) {
+        auctionListing.getBids().size();
         List<Bid> bids = auctionListing.getBids();
-        Bid highestBid = new Bid();
-        BigDecimal highestBidAmount = BigDecimal.ZERO;
-            
-        for (Bid bid : bids) {
-            if (bid.getAmount().compareTo(highestBidAmount) > 0) {
-                highestBid = bid;
-                highestBidAmount = bid.getAmount();
-            }
-        }
+        Bid highestBid = bids.get(bids.size() - 1);
         
         return highestBid;
     }
