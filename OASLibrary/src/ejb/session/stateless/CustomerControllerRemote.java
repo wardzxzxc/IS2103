@@ -1,8 +1,10 @@
 package ejb.session.stateless;
 
+import entity.Address;
 import entity.Customer;
 import entity.Employee;
 import java.util.List;
+import util.exception.AddressNotFoundException;
 import util.exception.CustomerExistException;
 import util.exception.CustomerNotFoundException;
 import util.exception.EmployeeExistException;
@@ -26,4 +28,14 @@ public interface CustomerControllerRemote {
     public Customer customerLogin(String username, String password) throws InvalidLoginCredentialException;
 
     public void updateCustomer(Customer customer);
+    
+    public void addNewAddress(Customer customer, Address address);
+    
+    public Address retrieveAddressByAddressId(Long addressId) throws AddressNotFoundException;
+    
+    public void updateAddress(Address address);
+    
+    public void deleteAddress(Long addressId) throws AddressNotFoundException;
+    
+    public void purchaseCreditPackage(Customer customer, Long creditPackageId);
 }

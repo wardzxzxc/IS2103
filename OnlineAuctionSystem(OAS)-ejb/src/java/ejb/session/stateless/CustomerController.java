@@ -1,5 +1,7 @@
 package ejb.session.stateless;
 
+import entity.Address;
+import entity.CreditPackage;
 import entity.Customer;
 import javax.ejb.Local;
 import javax.ejb.Remote;
@@ -10,6 +12,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import util.exception.AddressNotFoundException;
 import util.exception.CustomerExistException;
 import util.exception.CustomerNotFoundException;
 import util.exception.GeneralException;
@@ -90,6 +93,58 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     public void updateCustomer(Customer customer) {
         
         em.merge(customer);
+        
+    }
+    
+    @Override
+    public void addNewAddress(Customer customer, Address address) {
+        
+        em.persist(address);
+        em.flush();
+        em.refresh(address);
+        customer.getAddresses().add(address);
+        address.setCustomer(customer);
+        
+    }
+    
+    @Override
+    public Address retrieveAddressByAddressId(Long addressId) throws AddressNotFoundException {
+        
+        Address address = em.find(Address.class, addressId);
+        
+        if (address != null) {
+            return address;
+        } else {
+            throw new AddressNotFoundException("Address ID " + addressId + "does not exist");
+        }
+        
+    }
+    
+    @Override
+    public void updateAddress(Address address) {
+        
+        em.merge(address);
+        
+    }
+    
+    @Override
+    public void deleteAddress(Long addressId) throws AddressNotFoundException {
+        
+        Address address = retrieveAddressByAddressId(addressId);
+        
+        if (address != null) {
+            em.remove(address);
+        } else {
+            throw new AddressNotFoundException("Address ID " + addressId.toString() + "does not exist");
+        }   
+    }
+    
+    @Override
+    public void purchaseCreditPackage(Customer customer, Long creditPackageId) {
+        
+        CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
+        
+        customer.setCreditCurrBalance(customer.getCreditCurrBalance().add(creditPackage.getCreditPerPackage()));
         
     }
     
