@@ -15,6 +15,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import util.enumeration.CreditTransactionTypeEnum;
 import util.exception.AddressNotFoundException;
 import util.exception.CustomerExistException;
 import util.exception.CustomerNotFoundException;
@@ -157,7 +158,7 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         
         customer.setCreditCurrBalance(customer.getCreditCurrBalance().add(purchasedAmount));
         
-        CreditTransaction creditTransaction = new CreditTransaction(transactionDateTime, purchasedAmount, customer);
+        CreditTransaction creditTransaction = new CreditTransaction(transactionDateTime, purchasedAmount, CreditTransactionTypeEnum.PURCHASE, customer);
         em.persist(creditTransaction);
         em.flush();
         em.refresh(creditTransaction);

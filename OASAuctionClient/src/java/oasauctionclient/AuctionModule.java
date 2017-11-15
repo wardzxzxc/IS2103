@@ -4,6 +4,7 @@ import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.CustomerControllerRemote;
 import entity.Address;
 import entity.CreditPackage;
+import entity.CreditTransaction;
 import entity.Customer;
 import java.util.List;
 import java.util.Scanner;
@@ -70,7 +71,7 @@ public class AuctionModule {
                     doViewCreditBalance();
                 }
                 else if(response == 7) {
-                    
+                    doViewCreditTransactionHistory();
                 }
                 else if(response == 8) {
                     doPurchaseCreditPackage();
@@ -408,6 +409,29 @@ public class AuctionModule {
         System.out.println("Your current credit balance is: " + currentCustomer.getCreditCurrBalance().toString());
         
         System.out.println("Press any key to continue...> ");
+        sc.nextLine();
+        
+    }
+    
+    public void doViewCreditTransactionHistory() {
+        
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Auction Client :: Auction Menu :: View Credit Transaction History ***\n");        
+        
+        if (currentCustomer.getCreditTransaction().isEmpty()) {
+            System.out.println("You do have any credit transaction history!");
+        }
+        
+        else {
+            System.out.printf("%8s%10s%15s%50s\n", "Credit Transaction ID", "Amount", "Transaction Type", "Transaction Date Time");
+            
+            for (CreditTransaction ct:currentCustomer.getCreditTransaction()) {
+                System.out.printf("%8s%10s%15s%50s\n", ct.getCreditTransactionId().toString(), ct.getAmount().toString(), ct.getCreditTransactionType().toString(), ct.getTransactionDateTime().toString());
+            }
+        }
+        
+        System.out.print("Press any key to continue...> ");
         sc.nextLine();
         
     }

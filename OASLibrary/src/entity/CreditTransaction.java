@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import util.enumeration.CreditTransactionTypeEnum;
 
 /**
  *
@@ -33,7 +36,9 @@ public class CreditTransaction implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionDateTime;
     @Column(nullable = false, precision = 18, scale = 4)
-    private BigDecimal amount;    
+    private BigDecimal amount;
+    @Enumerated(EnumType.STRING)
+    private CreditTransactionTypeEnum creditTransactionType;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
@@ -41,8 +46,13 @@ public class CreditTransaction implements Serializable {
 
     public CreditTransaction() {
     }
-    
-    
+
+    public CreditTransaction(Date transactionDateTime, BigDecimal amount, CreditTransactionTypeEnum creditTransactionType, Customer customer) {
+        this.transactionDateTime = transactionDateTime;
+        this.amount = amount;
+        this.creditTransactionType = creditTransactionType;
+        this.customer = customer;
+    }
 
     public CreditTransaction(Date transactionDateTime, BigDecimal amount, Customer customer) {
         this.transactionDateTime = transactionDateTime;
@@ -106,6 +116,20 @@ public class CreditTransaction implements Serializable {
     @Override
     public String toString() {
         return "entity.CreditTransaction[ id=" + creditTransactionId + " ]";
+    }
+
+    /**
+     * @return the creditTransactionType
+     */
+    public CreditTransactionTypeEnum getCreditTransactionType() {
+        return creditTransactionType;
+    }
+
+    /**
+     * @param creditTransactionType the creditTransactionType to set
+     */
+    public void setCreditTransactionType(CreditTransactionTypeEnum creditTransactionType) {
+        this.creditTransactionType = creditTransactionType;
     }
     
 }
