@@ -38,6 +38,8 @@ public class AuctionListing implements Serializable {
     private String productName;
     @Column(nullable = false)
     private Boolean active;
+    @Column(nullable = false)
+    private Boolean expired;
     @Column(nullable = false, precision = 18, scale = 4)
     private BigDecimal currentHighestPrice;
     @Column(nullable = false)
@@ -55,6 +57,7 @@ public class AuctionListing implements Serializable {
     public AuctionListing() {        
         bids = new ArrayList<>();
         active = false;
+        expired = false;
     }
 
     public AuctionListing(BigDecimal reservePrice, String productName, Date startDateTime, Date endDateTime) {
@@ -65,9 +68,18 @@ public class AuctionListing implements Serializable {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.active = false;
+        this.expired = false;
       
     }
 
+    public Boolean getExpired() {
+        return expired;
+    }
+
+    public void setExpired(Boolean expired) {
+        this.expired = expired;
+    }
+    
     public void setWinner(Customer winner) {
         this.winner = winner;
     }

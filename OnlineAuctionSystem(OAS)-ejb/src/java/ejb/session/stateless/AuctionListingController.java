@@ -5,11 +5,12 @@
  */
 package ejb.session.stateless;
 
+import timer.NewTimerSessionBeanLocal;
 import entity.AuctionListing;
 import entity.Bid;
 import static entity.Employee_.employeeId;
-import java.math.BigDecimal;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -35,9 +36,9 @@ public class AuctionListingController implements AuctionListingControllerRemote,
     
     @PersistenceContext(unitName = "OnlineAuctionSystem_OAS_-ejbPU")
     private EntityManager em;
-
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
+    
+    @EJB
+    private NewTimerSessionBeanLocal newTimerSessionBean;
     
     @Override
     public AuctionListing createNewAuctionListing (AuctionListing auctionListing) throws AuctionListingExistException, GeneralException {
@@ -47,7 +48,8 @@ public class AuctionListingController implements AuctionListingControllerRemote,
             em.persist(auctionListing);
             em.flush();
             em.refresh(auctionListing);
-            
+            newTimerSessionBean.createStartTimer(auctionListing.getStartDateTime(), auctionListing.getAuctionListingId());
+            newTimerSessionBean.createEndTimer(auctionListing.getEndDateTime(), auctionListing.getAuctionListingId());
             return auctionListing;
         }
         catch (PersistenceException ex) {

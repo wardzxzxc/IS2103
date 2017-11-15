@@ -330,11 +330,11 @@ public class SystemAdministrationModule {
         System.out.println("Enter new password> ");
         String newPassword = sc.next().trim();
         
-        try {
-            employeeControllerRemote.changeMyPassword(employee, newPassword, oldPassword);
-            System.out.println("Password successfully changed!");
-        } catch (PasswordDoesNotMatchException ex) {
-            System.out.println("Error message: " + ex.getMessage() + "\n");
+         if (employee.getPassword().equals(oldPassword)) {
+            employee.setPassword(newPassword);
+            employeeControllerRemote.updateEmployee(employee);
+        } else {
+            System.out.println("Old password does not match");
         }
         
     }

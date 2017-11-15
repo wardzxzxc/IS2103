@@ -26,8 +26,9 @@ public class FinanceModule {
     public FinanceModule() {
     }
 
-    public FinanceModule(CreditPackageControllerRemote creditPackageControllerRemote, Employee currentEmployee) {
+    public FinanceModule(CreditPackageControllerRemote creditPackageControllerRemote, EmployeeControllerRemote employeeControllerRemote, Employee currentEmployee) {
         this.creditPackageControllerRemote = creditPackageControllerRemote;
+        this.employeeControllerRemote = employeeControllerRemote;
         this.currentEmployee = currentEmployee;
     }
     
@@ -228,11 +229,11 @@ public class FinanceModule {
         System.out.println("Enter new password> ");
         String newPassword = sc.next().trim();
         
-        try {
-            employeeControllerRemote.changeMyPassword(employee, newPassword, oldPassword);
-            System.out.println("Password successfully changed!");
-        } catch (PasswordDoesNotMatchException ex) {
-            System.out.println("Error message: " + ex.getMessage() + "\n");
+        if (employee.getPassword().equals(oldPassword)) {
+            employee.setPassword(newPassword);
+            employeeControllerRemote.updateEmployee(employee);
+        } else {
+            System.out.println("Old password does not match");
         }
         
     }

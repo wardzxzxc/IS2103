@@ -122,14 +122,4 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         }   
     }
     
-    @Override
-    public void changeMyPassword(Employee employee, String newPassword, String oldPassword) throws PasswordDoesNotMatchException {
-        if (employee.getPassword().equals(oldPassword)) {
-            employee.setPassword(newPassword);
-        } else {
-            throw new PasswordDoesNotMatchException("Current password is invalid");
-        }
-        
-        updateEmployee(employee);
-    }
 }

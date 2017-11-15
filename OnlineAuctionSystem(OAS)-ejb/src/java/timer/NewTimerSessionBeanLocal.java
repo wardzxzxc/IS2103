@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ejb.session.stateless;
+package timer;
 
+import java.util.Date;
 import javax.ejb.Local;
 
 /**
@@ -14,5 +15,13 @@ import javax.ejb.Local;
 @Local
 public interface NewTimerSessionBeanLocal {
     
-    public void myTimer();
+
+
+    public void cancelStartTimer(Long auctionId);
+
+    public void cancelEndTimer(Long auctionId);
+
+    public void createEndTimer(Date end, Long auctionId);
+
+    public void createStartTimer(Date start, Long auctionId);
 }
