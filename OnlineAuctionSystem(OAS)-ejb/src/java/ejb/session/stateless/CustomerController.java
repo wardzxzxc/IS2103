@@ -2,7 +2,10 @@ package ejb.session.stateless;
 
 import entity.Address;
 import entity.CreditPackage;
+import entity.CreditTransaction;
 import entity.Customer;
+import java.math.BigDecimal;
+import java.util.Date;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -97,13 +100,14 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
-    public void addNewAddress(Customer customer, Address address) {
+    public Customer addNewAddress(Customer customer, Address address) {
         
         em.persist(address);
         em.flush();
         em.refresh(address);
         customer.getAddresses().add(address);
         address.setCustomer(customer);
+        return customer;
         
     }
     
@@ -128,23 +132,38 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
-    public void deleteAddress(Long addressId) throws AddressNotFoundException {
+    public Customer deleteAddress(Long addressId) throws AddressNotFoundException {
         
         Address address = retrieveAddressByAddressId(addressId);
         
         if (address != null) {
             em.remove(address);
+            em.flush();
+            em.refresh(address);
+            return address.getCustomer();
         } else {
             throw new AddressNotFoundException("Address ID " + addressId.toString() + "does not exist");
-        }   
+        }
     }
     
     @Override
-    public void purchaseCreditPackage(Customer customer, Long creditPackageId) {
+    public Customer purchaseCreditPackage(Customer customer, Long creditPackageId, int numUnits) {
+        
+        Date transactionDateTime = new Date();
         
         CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
         
-        customer.setCreditCurrBalance(customer.getCreditCurrBalance().add(creditPackage.getCreditPerPackage()));
+        BigDecimal purchasedAmount = creditPackage.getCreditPerPackage().multiply(new BigDecimal(numUnits));
+        
+        customer.setCreditCurrBalance(customer.getCreditCurrBalance().add(purchasedAmount));
+        
+        CreditTransaction creditTransaction = new CreditTransaction(transactionDateTime, purchasedAmount, customer);
+        em.persist(creditTransaction);
+        em.flush();
+        em.refresh(creditTransaction);
+        customer.getCreditTransaction().add(creditTransaction);
+        
+        return customer;
         
     }
     

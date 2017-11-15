@@ -204,7 +204,7 @@ public class AuctionModule {
         
         Address newAddress = new Address(addressLine1, addressLine2, postalCode, currentCustomer);
         
-        customerControllerRemote.addNewAddress(currentCustomer, newAddress);
+        currentCustomer = customerControllerRemote.addNewAddress(currentCustomer, newAddress);
         System.out.println("New address added successfully!");
         
     }
@@ -217,49 +217,53 @@ public class AuctionModule {
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Address Details ***\n");
         System.out.print("Enter Address ID> ");
         Long addressId = sc.nextLong();
+        Address address = null;
         
-        while (true) {
+        try {
+                address = customerControllerRemote.retrieveAddressByAddressId(addressId);
+        }
+        catch(AddressNotFoundException ex) {
+                System.out.println("An error has occurred while retrieving address: " + ex.getMessage() + "\n");
+        }
+        
+        while (address != null) {
             
-            try
+            if (!address.isEnabled()) {
+                System.out.println("Invalid address, it has already been deleted!");
+                break;
+            }
+
+            System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
+            System.out.printf("%8s%50s%50s%8s\n", address.getAddressId().toString(), address.getAddressLine1(), address.getAddressLine2(), address.getPostalCode());
+            System.out.println("------------------------");
+            System.out.println("1: Update Address");
+            System.out.println("2: Delete Address");
+            System.out.println("3: Back\n");
+            response = 0;
+
+            while(response < 1 || response > 3)
             {
-                Address address = customerControllerRemote.retrieveAddressByAddressId(addressId);
-                System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
-                System.out.printf("%8s%50s%50s%8s\n", address.getAddressId().toString(), address.getAddressLine1(), address.getAddressLine2(), address.getPostalCode());
-                System.out.println("------------------------");
-                System.out.println("1: Update Address");
-                System.out.println("2: Delete Address");
-                System.out.println("3: Back\n");
-                response = 0;
+                System.out.print("> ");
 
-                while(response < 1 || response > 3)
+                response = sc.nextInt();
+
+                if(response == 1)
                 {
-                    System.out.print("> ");
-
-                    response = sc.nextInt();
-
-                    if(response == 1)
-                    {
-                        doUpdateAddress(address);
-                    }
-                    else if(response == 2)
-                    {
-                        doDeleteAddress(address);
-                    }
-                    else if(response == 3)
-                    {
-                        break;
-                    }
-                    else 
-                    { 
-                        System.out.println("Invalid option, please try again!\n");
-                    }
+                    doUpdateAddress(address);
+                }
+                else if(response == 2)
+                {
+                    doDeleteAddress(address);
+                }
+                else if(response == 3)
+                {
+                    break;
+                }
+                else 
+                { 
+                    System.out.println("Invalid option, please try again!\n");
                 }
             }
-            catch(AddressNotFoundException ex)
-            {
-                System.out.println("An error has occurred while retrieving address: " + ex.getMessage() + "\n");
-            }
-            
             if (response == 3) {
                 break;
             }
@@ -341,7 +345,7 @@ public class AuctionModule {
         {
             try 
             {
-                customerControllerRemote.deleteAddress(address.getAddressId());
+                currentCustomer = customerControllerRemote.deleteAddress(address.getAddressId());
                 System.out.println("Address deleted successfully!\n");
             } 
             catch (AddressNotFoundException ex) 
@@ -365,14 +369,28 @@ public class AuctionModule {
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View All Addresses ***\n");
         
-        if (currentCustomer.getAddresses().isEmpty()) {
+        boolean noEnabled = true;
+        
+        if (!currentCustomer.getAddresses().isEmpty()) {
+            for (Address add:currentCustomer.getAddresses()) {
+                if (add.isEnabled()) {
+                    noEnabled = false;
+                }
+            }
+        }
+        
+        
+        if (currentCustomer.getAddresses().isEmpty() || noEnabled) {
             System.out.println("You do have any address registered, please create a new address!");
         }
+        
         else {
             System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
             
             for (Address add:currentCustomer.getAddresses()) {
-                System.out.printf("%8s%50s%50s%8s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
+                if (add.isEnabled()) {
+                    System.out.printf("%8s%50s%50s%8s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
+                }
             }
         }
         
@@ -405,10 +423,12 @@ public class AuctionModule {
         System.out.println("Available Credit Packages:\n");
         
         System.out.printf("%8s%15s\n", "Credit Package ID", "Credits Per Package");
-            
-        for (CreditPackage cp:creditPackages) {
-            if (cp.getEnabled()) {
-                System.out.printf("%8s%15s\n", cp.getCreditPackageId().toString(), cp.getCreditPerPackage().toString());
+        
+        if (!creditPackages.isEmpty()) {
+            for (CreditPackage cp:creditPackages) {
+                if (cp.getEnabled()) {
+                    System.out.printf("%8s%15s\n", cp.getCreditPackageId().toString(), cp.getCreditPerPackage().toString());
+                }
             }
         }
         
@@ -417,8 +437,11 @@ public class AuctionModule {
         System.out.println("Enter Credit Package ID to purchase> ");
         Long creditPackageId = sc.nextLong();
         sc.nextLine();
+        System.out.println("Enter number of units tp purchase> ");
+        int numUnits = sc.nextInt();
+        sc.nextLine();
         
-        customerControllerRemote.purchaseCreditPackage(currentCustomer, creditPackageId);
+        currentCustomer = customerControllerRemote.purchaseCreditPackage(currentCustomer, creditPackageId, numUnits);
         System.out.println("Credit package purchased successfully!");
         
     }

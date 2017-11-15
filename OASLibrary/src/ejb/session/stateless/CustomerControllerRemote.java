@@ -29,13 +29,13 @@ public interface CustomerControllerRemote {
 
     public void updateCustomer(Customer customer);
     
-    public void addNewAddress(Customer customer, Address address);
+    public Customer addNewAddress(Customer customer, Address address);
     
     public Address retrieveAddressByAddressId(Long addressId) throws AddressNotFoundException;
     
     public void updateAddress(Address address);
     
-    public void deleteAddress(Long addressId) throws AddressNotFoundException;
+    public Customer deleteAddress(Long addressId) throws AddressNotFoundException;
     
-    public void purchaseCreditPackage(Customer customer, Long creditPackageId);
+    public Customer purchaseCreditPackage(Customer customer, Long creditPackageId, int numUnits);
 }
