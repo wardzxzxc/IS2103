@@ -35,6 +35,8 @@ public class Bid implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
     private AuctionListing auctionListing;
+    @ManyToOne
+    private Address address;
 
     public Bid() {
     }
@@ -101,6 +103,20 @@ public class Bid implements Serializable {
     @Override
     public String toString() {
         return "entity.Bid[ id=" + bidId + " ]";
+    }
+
+    /**
+     * @return the address
+     */
+    public Address getAddress() {
+        return address;
+    }
+
+    /**
+     * @param address the address to set
+     */
+    public void setAddress(Address address) {
+        this.address = address;
     }
     
 }

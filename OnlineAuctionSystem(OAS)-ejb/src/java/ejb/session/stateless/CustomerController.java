@@ -1,6 +1,11 @@
 package ejb.session.stateless;
 
+import entity.Address;
+import entity.CreditPackage;
+import entity.CreditTransaction;
 import entity.Customer;
+import java.math.BigDecimal;
+import java.util.Date;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -10,6 +15,8 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import util.enumeration.CreditTransactionTypeEnum;
+import util.exception.AddressNotFoundException;
 import util.exception.CustomerExistException;
 import util.exception.CustomerNotFoundException;
 import util.exception.GeneralException;
@@ -90,6 +97,74 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     public void updateCustomer(Customer customer) {
         
         em.merge(customer);
+        
+    }
+    
+    @Override
+    public Customer addNewAddress(Customer customer, Address address) {
+        
+        em.persist(address);
+        em.flush();
+        em.refresh(address);
+        customer.getAddresses().add(address);
+        address.setCustomer(customer);
+        return customer;
+        
+    }
+    
+    @Override
+    public Address retrieveAddressByAddressId(Long addressId) throws AddressNotFoundException {
+        
+        Address address = em.find(Address.class, addressId);
+        
+        if (address != null) {
+            return address;
+        } else {
+            throw new AddressNotFoundException("Address ID " + addressId + "does not exist");
+        }
+        
+    }
+    
+    @Override
+    public void updateAddress(Address address) {
+        
+        em.merge(address);
+        
+    }
+    
+    @Override
+    public Customer deleteAddress(Long addressId) throws AddressNotFoundException {
+        
+        Address address = retrieveAddressByAddressId(addressId);
+        
+        if (address != null) {
+            em.remove(address);
+            em.flush();
+            em.refresh(address);
+            return address.getCustomer();
+        } else {
+            throw new AddressNotFoundException("Address ID " + addressId.toString() + "does not exist");
+        }
+    }
+    
+    @Override
+    public Customer purchaseCreditPackage(Customer customer, Long creditPackageId, int numUnits) {
+        
+        Date transactionDateTime = new Date();
+        
+        CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
+        
+        BigDecimal purchasedAmount = creditPackage.getCreditPerPackage().multiply(new BigDecimal(numUnits));
+        
+        customer.setCreditCurrBalance(customer.getCreditCurrBalance().add(purchasedAmount));
+        
+        CreditTransaction creditTransaction = new CreditTransaction(transactionDateTime, purchasedAmount, CreditTransactionTypeEnum.PURCHASE, customer);
+        em.persist(creditTransaction);
+        em.flush();
+        em.refresh(creditTransaction);
+        customer.getCreditTransaction().add(creditTransaction);
+        
+        return customer;
         
     }
     

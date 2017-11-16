@@ -1,6 +1,7 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 /**
  *
@@ -26,21 +28,23 @@ public class Address implements Serializable {
     private String addressLine2;
     @Column(length = 6, nullable = false, unique = true)
     private String postalCode;
+    private boolean enabled;
     
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
     private Customer customer;
+    @OneToMany(mappedBy = "address")
+    private List<Bid> bidsWon;
 
     public Address() {
     }
-    
-    
 
     public Address(String addressLine1, String addressLine2, String postalCode, Customer customer) {
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
         this.postalCode = postalCode;
         this.customer = customer;
+        this.enabled = true;
     }
 
     public Customer getCustomer() {
@@ -125,6 +129,34 @@ public class Address implements Serializable {
      */
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
+    }
+
+    /**
+     * @return the enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * @param enabled the enabled to set
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    /**
+     * @return the bidsWon
+     */
+    public List<Bid> getBidsWon() {
+        return bidsWon;
+    }
+
+    /**
+     * @param bidsWon the bidsWon to set
+     */
+    public void setBidsWon(List<Bid> bidsWon) {
+        this.bidsWon = bidsWon;
     }
     
 }
