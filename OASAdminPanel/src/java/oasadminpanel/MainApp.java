@@ -3,6 +3,7 @@ package oasadminpanel;
 import ejb.session.stateless.AuctionListingControllerRemote;
 import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.EmployeeControllerRemote;
+import ejb.session.stateless.NewTimerSessionBeanRemote;
 import entity.Employee;
 import java.util.Scanner;
 import util.enumeration.EmployeeAccessRightsEnum;
@@ -18,15 +19,18 @@ public class MainApp {
     private FinanceModule financeModule;
     private SalesModule salesModule;
     
+    private NewTimerSessionBeanRemote timerSessionBeanRemote;
+    
     private Employee currentEmployee;
 
     public MainApp() {
     }
 
-    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote) {
+    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, NewTimerSessionBeanRemote timerSessionBeanRemote) {
         this.employeeControllerRemote = employeeControllerRemote;
         this.creditPackageControllerRemote = creditPackageControllerRemote;
         this.auctionListingControllerRemote = auctionListingControllerRemote;
+        this.timerSessionBeanRemote = timerSessionBeanRemote;
     }
     
     
@@ -55,10 +59,10 @@ public class MainApp {
                             systemAdministrationModule.systemAdministrationMenu();
                         }
                         else if (currentEmployee.getAccessRight() == EmployeeAccessRightsEnum.FINANCE) {
-                            financeModule = new FinanceModule(creditPackageControllerRemote, currentEmployee);
+                            financeModule = new FinanceModule(creditPackageControllerRemote, employeeControllerRemote, currentEmployee);
                             financeModule.financeMenu();
                         } else {
-                            salesModule = new SalesModule(auctionListingControllerRemote, currentEmployee);
+                            salesModule = new SalesModule(auctionListingControllerRemote, employeeControllerRemote, currentEmployee, timerSessionBeanRemote);
                             salesModule.salesMenu();
                         }
                     }

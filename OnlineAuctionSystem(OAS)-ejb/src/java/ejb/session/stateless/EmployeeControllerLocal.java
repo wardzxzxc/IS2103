@@ -29,6 +29,5 @@ public interface EmployeeControllerLocal {
 
     public void updateEmployee(Employee employee);
 
-    public void changeMyPassword(Employee employee, String newPassword, String oldPassword) throws PasswordDoesNotMatchException;
 
 }
