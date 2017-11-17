@@ -17,6 +17,9 @@ import datamodel.TimerInfo;
 import ejb.session.stateless.AuctionListingControllerLocal;
 import ejb.session.stateless.NewTimerSessionBeanRemote;
 import entity.AuctionListing;
+import entity.Bid;
+import entity.Customer;
+import java.math.BigDecimal;
 import java.util.Collection;
 import javax.ejb.EJB;
 import javax.ejb.NoSuchObjectLocalException;
@@ -134,8 +137,15 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
             auctionListing.setExpired(true);
             System.out.println("End Timer.handleTimeout(): " + timerInfo.getAuctionId().toString() + " " + timerInfo.getStart());
             System.out.println("End Timer.handleTimeout(): " + timerInfo.getAuctionId().toString() + " is now closed!");
+            Bid highestBid = auctionListingController.findLargestBid(auctionListing);
+            BigDecimal highestPrice = highestBid.getAmount();
+            
+            if (highestPrice.compareTo(auctionListing.getReservePrice()) > 0) {
+                Customer winner = highestBid.getCustomer();
+                winner.getAuctionsWon().add(auctionListing);
+                auctionListing.setWinner(winner);
+                auctionListingController.updateAuctionListing(auctionListing);
+            }
         }
-           
     }
-    
 }

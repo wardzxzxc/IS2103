@@ -36,4 +36,5 @@ public interface AuctionListingControllerRemote {
     
     public Bid findLargestBid(AuctionListing auctionListing);
     
+    public void refundBids(AuctionListing auctionListing);
 }

@@ -8,7 +8,9 @@ package ejb.session.stateless;
 import timer.NewTimerSessionBeanLocal;
 import entity.AuctionListing;
 import entity.Bid;
+import entity.Customer;
 import static entity.Employee_.employeeId;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Local;
@@ -137,6 +139,16 @@ public class AuctionListingController implements AuctionListingControllerRemote,
         Bid highestBid = bids.get(bids.size() - 1);
         
         return highestBid;
+    }
+    
+    
+    @Override
+    public void refundBids(AuctionListing auctionListing) {
+        List<Bid> allBids = auctionListing.getBids();
+        for (Bid bid : allBids) {
+            Customer customer = bid.getCustomer();
+            customer.setCreditCurrBalance((customer.getCreditCurrBalance()).add(bid.getAmount()));
+        }
     }
     
     

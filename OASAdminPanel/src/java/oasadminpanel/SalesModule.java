@@ -286,18 +286,22 @@ public class SalesModule {
         System.out.printf("Confirm Delete Auction Listing %s (Auction Listing ID: %d) (Enter 'Y' to Delete)> ", auctionListing.getProductName(), auctionListing.getAuctionListingId());
         input = sc.nextLine().trim();
         
-        if(input.equals("Y"))
-        {
-            try {
-                auctionListingControllerRemote.deleteAuctionListing(auctionListing.getAuctionListingId());
+        if(input.equals("Y")) {
+            if (auctionListing.getBids().isEmpty()) {
+                try {
+                    auctionListingControllerRemote.deleteAuctionListing(auctionListing.getAuctionListingId());
+                    System.out.println("Auction listing deleted successfully!\n");
+                } catch (AuctionListingNotFoundException ex) {
+                    System.out.println("Error has occurred: " + ex.getMessage());
+                }
+            } else {
+                auctionListing.setActive(false);
                 timerSessionBeanRemote.cancelEndTimer(auctionListing.getAuctionListingId());
                 timerSessionBeanRemote.cancelStartTimer(auctionListing.getAuctionListingId());
+                auctionListingControllerRemote.refundBids(auctionListing);
                 System.out.println("Auction listing deleted successfully!\n");
-            } 
-            catch (AuctionListingNotFoundException ex) {
-                System.out.println("An error has occurred while deleting auction listing: " + ex.getMessage() + "\n");
-            }            
-        }
+            }
+        }              
         else {
             System.out.println("Auction listing NOT deleted!\n");
         }
@@ -332,7 +336,7 @@ public class SalesModule {
         System.out.printf("%%8s%16s%30s%45s%35s%20s%12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active");
         
         for(AuctionListing listing:auctionListings) {
-            if (!(listing.getActive())&&(listing.getCurrentHighestPrice().compareTo(listing.getReservePrice()) < 0) && (listing.getExpired() == false)) {
+            if ((listing.getCurrentHighestPrice().compareTo(listing.getReservePrice()) < 0) && (listing.getExpired() == true)) {
                 System.out.printf("%8s%26s%40s%40s%25s%20s%18s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice(), listing.getActive());
             }
         }
@@ -373,12 +377,20 @@ public class SalesModule {
         String oldPassword = sc.next().trim();
         System.out.println("Enter new password> ");
         String newPassword = sc.next().trim();
+        System.out.println("Enter new password again> ");
+        String newPasswordAgain = sc.next().trim();
         
-        if (employee.getPassword().equals(oldPassword)) {
+        if (!(newPassword.equals(newPasswordAgain))) {
+            System.out.println("Please make sure that both new passwords are the same");
+            return;
+        }
+        
+        if (employee.getPassword().equals(oldPassword) && newPassword.equals(newPasswordAgain)) {
             employee.setPassword(newPassword);
             employeeControllerRemote.updateEmployee(employee);
         } else {
             System.out.println("Old password does not match");
+            return;
         }
         
     }
@@ -395,7 +407,7 @@ public class SalesModule {
         try {
             auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionId);
             
-            if ((auctionListing.getActive())&&(auctionListing.getCurrentHighestPrice().compareTo(auctionListing.getReservePrice()) < 0)) {
+            if (auctionListing.getExpired() && (auctionListing.getCurrentHighestPrice().compareTo(auctionListing.getReservePrice()) < 0)) {
                 System.out.println("Sorry Auction ID " + auctionListing.getAuctionListingId() + " has a highest bid that is greater than the reserve price");
                 return;       
             }
@@ -417,20 +429,17 @@ public class SalesModule {
                         Customer customer = highestBid.getCustomer();
                         auctionListing.setWinner(customer);
                         customer.getAuctionsWon().add(auctionListing);
-                        auctionListing.setActive(false);
                         System.out.println("Winning bid is assigned to Customer ID: " + customer.getCustomerId());
                         auctionListingControllerRemote.updateAuctionListing(auctionListing);
                     } else if (response == 2) {
-                        auctionListing.setActive(false);
-                        auctionListing.setExpired(true);
-                        System.out.println("Auction ID " + auctionListing.getAuctionListingId() + " has been successfully closed.");
-                        auctionListingControllerRemote.updateAuctionListing(auctionListing);
+                        System.out.println("Auction ID " + auctionListing.getAuctionListingId() + " has been successfully closed with no winner.");
                     } else if (response == 3){
                         break;
                     } else {
                         System.out.println("Sorry, please key in a valid option");
                     }
                 }
+                
                 if (response == 3) {
                      break;
                 }

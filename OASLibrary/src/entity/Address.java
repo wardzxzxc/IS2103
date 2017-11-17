@@ -1,6 +1,7 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,6 +38,7 @@ public class Address implements Serializable {
     private List<Bid> bidsWon;
 
     public Address() {
+        this.bidsWon = new ArrayList<>();
     }
 
     public Address(String addressLine1, String addressLine2, String postalCode, Customer customer) {

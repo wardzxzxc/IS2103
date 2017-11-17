@@ -1,8 +1,10 @@
 package oasauctionclient;
 
+import ejb.session.stateless.AuctionListingControllerRemote;
 import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.CustomerControllerRemote;
 import entity.Address;
+import entity.AuctionListing;
 import entity.CreditPackage;
 import entity.CreditTransaction;
 import entity.Customer;
@@ -14,15 +16,17 @@ public class AuctionModule {
 
     private CustomerControllerRemote customerControllerRemote;
     private CreditPackageControllerRemote creditPackageControllerRemote;
+    private AuctionListingControllerRemote auctionListingControllerRemote;
     
     private Customer currentCustomer;
     
     public AuctionModule() {
     }
 
-    public AuctionModule(CustomerControllerRemote customerControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, Customer currentCustomer) {
+    public AuctionModule(CustomerControllerRemote customerControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, Customer currentCustomer) {
         this.customerControllerRemote = customerControllerRemote;
         this.creditPackageControllerRemote = creditPackageControllerRemote;
+        this.auctionListingControllerRemote = auctionListingControllerRemote;
         this.currentCustomer = currentCustomer;
     }
     
@@ -343,16 +347,20 @@ public class AuctionModule {
         input = sc.nextLine().trim();
         
         if(input.equals("Y"))
-        {
-            try 
-            {
-                currentCustomer = customerControllerRemote.deleteAddress(address.getAddressId());
-                System.out.println("Address deleted successfully!\n");
-            } 
-            catch (AddressNotFoundException ex) 
-            {
-                System.out.println("An error has occurred while deleting employee: " + ex.getMessage() + "\n");
-            }            
+        {   if (address.getBidsWon().isEmpty() == true) {
+                try 
+                {
+                    currentCustomer = customerControllerRemote.deleteAddress(address.getAddressId());
+                    System.out.println("Address deleted successfully!\n");
+                } 
+                catch (AddressNotFoundException ex) 
+                {
+                    System.out.println("An error has occurred while deleting address: " + ex.getMessage() + "\n");
+                }
+            } else {
+                address.setEnabled(false);
+                customerControllerRemote.updateAddress(address);
+            }
         }
         else if (input.equals("N"))
         {
@@ -461,13 +469,32 @@ public class AuctionModule {
         System.out.println("Enter Credit Package ID to purchase> ");
         Long creditPackageId = sc.nextLong();
         sc.nextLine();
-        System.out.println("Enter number of units tp purchase> ");
+        System.out.println("Enter number of units to purchase> ");
         int numUnits = sc.nextInt();
         sc.nextLine();
         
         currentCustomer = customerControllerRemote.purchaseCreditPackage(currentCustomer, creditPackageId, numUnits);
         System.out.println("Credit package purchased successfully!");
         
+    }
+    
+    public void doBrowseAllAuctions() {
+        
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Auction Client :: Auction Menu :: View All Auction Listings ***\n");
+        
+        List<AuctionListing> auctionListings = auctionListingControllerRemote.retrieveAllAuctionListing();
+        System.out.printf("%8s%16s%30s%45s%35s%20s%12s%12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Expired");
+        
+        for(AuctionListing listing:auctionListings) {
+            if (listing.getActive() == true) {
+            System.out.printf("%8s%26s%40s%40s%25s%20s%18s%12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice(), listing.getActive(), listing.getExpired());
+            }
+        }
+        
+        System.out.print("Press any key to continue...> ");
+        sc.nextLine();
     }
     
 }

@@ -35,5 +35,7 @@ public interface AuctionListingControllerLocal {
     public void updateAuctionListing(AuctionListing auctionListing);
 
     public Bid findLargestBid(AuctionListing auctionListing);
+
+    public void refundBids(AuctionListing auctionListing);
     
 }
