@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -37,6 +38,8 @@ public class Bid implements Serializable {
     private AuctionListing auctionListing;
     @ManyToOne
     private Address address;
+    @OneToOne
+    private AuctionListing auctionWon;
 
     public Bid() {
     }
@@ -46,6 +49,16 @@ public class Bid implements Serializable {
         this.customer = customer;
         this.auctionListing = auctionListing;
     }
+
+    public AuctionListing getAuctionWon() {
+        return auctionWon;
+    }
+
+    public void setAuctionWon(AuctionListing auctionWon) {
+        this.auctionWon = auctionWon;
+    }
+    
+    
 
     public Customer getCustomer() {
         return customer;

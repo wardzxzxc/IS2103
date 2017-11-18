@@ -78,6 +78,10 @@ public class BidController implements BidControllerRemote, BidControllerLocal {
         return customer;
     }
     
+    @Override
+    public void updateBid(Bid bid) {
+        em.merge(bid);
+    }
     
 
     // Add business logic below. (Right-click in editor and choose

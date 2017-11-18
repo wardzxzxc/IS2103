@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -53,6 +54,8 @@ public class AuctionListing implements Serializable {
     private Customer winner;
     @OneToMany(mappedBy = "auctionListing")
     private List<Bid> bids;
+    @OneToOne(mappedBy = "auctionWon")
+    private Bid winningBid;
     
     public AuctionListing() {        
         bids = new ArrayList<>();
@@ -71,6 +74,15 @@ public class AuctionListing implements Serializable {
         this.expired = false;
       
     }
+
+    public Bid getWinningBid() {
+        return winningBid;
+    }
+
+    public void setWinningBid(Bid winningBid) {
+        this.winningBid = winningBid;
+    }
+    
 
     public Boolean getExpired() {
         return expired;

@@ -1,6 +1,7 @@
 package oasauctionclient;
 
 import ejb.session.stateless.AuctionListingControllerRemote;
+import ejb.session.stateless.BidControllerRemote;
 import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.CustomerControllerRemote;
 import entity.Customer;
@@ -14,6 +15,7 @@ public class MainApp {
     private CustomerControllerRemote customerControllerRemote;
     private CreditPackageControllerRemote creditPackageControllerRemote;
     private AuctionListingControllerRemote auctionListingControllerRemote;
+    private BidControllerRemote bidControllerRemote;
     
     
     private Customer currentCustomer;
@@ -21,10 +23,11 @@ public class MainApp {
     public MainApp() {
     }
 
-    public MainApp(CustomerControllerRemote customerControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote) {
+    public MainApp(CustomerControllerRemote customerControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, BidControllerRemote bidControllerRemote) {
         this.customerControllerRemote = customerControllerRemote;
         this.creditPackageControllerRemote = creditPackageControllerRemote;
         this.auctionListingControllerRemote = auctionListingControllerRemote;
+        this.bidControllerRemote = bidControllerRemote;
     }
     
     public void runApp() {

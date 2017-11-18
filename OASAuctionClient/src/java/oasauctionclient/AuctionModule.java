@@ -1,32 +1,41 @@
 package oasauctionclient;
 
 import ejb.session.stateless.AuctionListingControllerRemote;
+import ejb.session.stateless.BidControllerRemote;
 import ejb.session.stateless.CreditPackageControllerRemote;
 import ejb.session.stateless.CustomerControllerRemote;
 import entity.Address;
 import entity.AuctionListing;
+import entity.Bid;
 import entity.CreditPackage;
 import entity.CreditTransaction;
 import entity.Customer;
+import static java.lang.System.out;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
 import util.exception.AddressNotFoundException;
+import util.exception.AuctionListingNotFoundException;
+import util.exception.BidExistException;
+import util.exception.GeneralException;
 
 public class AuctionModule {
 
     private CustomerControllerRemote customerControllerRemote;
     private CreditPackageControllerRemote creditPackageControllerRemote;
     private AuctionListingControllerRemote auctionListingControllerRemote;
+    private BidControllerRemote bidControllerRemote;
     
     private Customer currentCustomer;
     
     public AuctionModule() {
     }
 
-    public AuctionModule(CustomerControllerRemote customerControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, Customer currentCustomer) {
+    public AuctionModule(CustomerControllerRemote customerControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, BidControllerRemote bidControllerRemote, Customer currentCustomer) {
         this.customerControllerRemote = customerControllerRemote;
         this.creditPackageControllerRemote = creditPackageControllerRemote;
         this.auctionListingControllerRemote = auctionListingControllerRemote;
+        this.bidControllerRemote = bidControllerRemote;
         this.currentCustomer = currentCustomer;
     }
     
@@ -81,7 +90,7 @@ public class AuctionModule {
                     doPurchaseCreditPackage();
                 }
                 else if(response == 9) {
-                    
+                    doBrowseAllWonAuctions();
                 }
                 else if(response == 10) {
                     
@@ -485,16 +494,257 @@ public class AuctionModule {
         System.out.println("*** OAS Auction Client :: Auction Menu :: View All Auction Listings ***\n");
         
         List<AuctionListing> auctionListings = auctionListingControllerRemote.retrieveAllAuctionListing();
-        System.out.printf("%8s%16s%30s%45s%35s%20s%12s%12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Expired");
+        System.out.printf("%8s%16s%30s%45s%35s%20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
         
         for(AuctionListing listing:auctionListings) {
             if (listing.getActive() == true) {
-            System.out.printf("%8s%26s%40s%40s%25s%20s%18s%12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice(), listing.getActive(), listing.getExpired());
-            }
+            System.out.printf("%8s%26s%40s%40s%25s%20s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice());            }
         }
         
         System.out.print("Press any key to continue...> ");
         sc.nextLine();
     }
     
+    public void viewAuctionDetails() {
+        
+        Scanner sc = new Scanner(System.in);
+        Integer response = 0;
+        
+        System.out.println("*** OAS Auction Client :: Auction Menu :: View Auction Listing Details ***\n");
+        System.out.print("Enter Auction Listing ID> ");
+        Long auctionListingId = sc.nextLong();
+        
+        
+        try
+        {
+            AuctionListing auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
+            if (auctionListing.getActive() == true) {
+                System.out.printf("%8s%16s%30s%45s%35s%20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
+                System.out.printf("%8s%26s%40s%40s%25s%20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice(), auctionListing.getReservePrice());         
+                System.out.println("------------------------");
+                while(true) {
+                    System.out.println("1: Place New Bid");
+                    System.out.println("2: Refresh Auction Listing Bid");
+                    System.out.println("3: Back\n");
+                    System.out.print("> ");
+                    response = 0;
+                    while(response < 1 || response > 3) {
+                        response = sc.nextInt();
+                        if(response == 1)
+                        {
+                            doPlaceNewBid(auctionListing);
+                        }
+                        else if(response == 2)
+                        {
+                            doRefreshAuctionListingBid(auctionListing);
+                        } else if (response == 3) {
+                            break;
+                        } else {
+                            System.out.println("Sorry, invalid option!");
+                        }
+                    }
+                    if (response == 3) {
+                        break;
+                    }
+                }
+            } else {
+                System.out.println("Sorry, the auction is currently closed!");
+                return;
+            }
+        }
+        catch(AuctionListingNotFoundException ex)
+        {
+            System.out.println("An error has occurred while retrieving auction listing: " + ex.getMessage() + "\n");
+        }
+    }
+    
+    public void doPlaceNewBid(AuctionListing auctionListing) {
+        
+         System.out.println("*** OAS Auction Client :: Auction Menu :: View Auction Listing Details :: Place New Bid ***\n");
+         
+         Bid bidPlaced = new Bid();
+         bidPlaced.setCustomer(currentCustomer);
+         
+         BigDecimal highestBid = auctionListing.getCurrentHighestPrice();
+         
+         if (highestBid.compareTo(new BigDecimal("0.01")) >= 0 && highestBid.compareTo(new BigDecimal("0.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("0.05");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("1.00")) >= 0 && highestBid.compareTo(new BigDecimal("4.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("0.25");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("5.00")) >= 0 && highestBid.compareTo(new BigDecimal("24.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("0.50");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("25.00")) >= 0 && highestBid.compareTo(new BigDecimal("99.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("1.00");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("100.00")) >= 0 && highestBid.compareTo(new BigDecimal("249.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("2.50");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("250.00")) >= 0 && highestBid.compareTo(new BigDecimal("499.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("5.00");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("500.00")) >= 0 && highestBid.compareTo(new BigDecimal("999.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("10.00");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("1000")) >= 0 && highestBid.compareTo(new BigDecimal("2499.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("25.00");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("2500")) >= 0 && highestBid.compareTo(new BigDecimal("4999.99")) <= 0) {
+             BigDecimal increment = new BigDecimal("50.00");
+             bidPlaced.setAmount(highestBid.add(increment));
+         } else if (highestBid.compareTo(new BigDecimal("5000")) >= 0) {
+             BigDecimal increment = new BigDecimal("100.00");
+             bidPlaced.setAmount(highestBid.add(increment));
+         }
+         
+         try {
+             bidControllerRemote.createNewBid(bidPlaced);
+         } catch(BidExistException | GeneralException ex) {
+              System.out.println("An error occurred in registering your new account " + ex.getMessage() + "\n");
+         }
+         
+         auctionListing.getBids().add(bidPlaced);
+         auctionListing.setCurrentHighestPrice(bidPlaced.getAmount());
+         auctionListingControllerRemote.updateAuctionListing(auctionListing);
+            
+         System.out.println("Bid of " + bidPlaced.getAmount().toString() + " has been placed successfully");
+        
+    }
+    
+    public void doRefreshAuctionListingBid(AuctionListing auctionListing) {
+        
+        System.out.printf("%8s%16s%30s%45s%35s%20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
+        System.out.printf("%8s%26s%40s%40s%25s%20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice(), auctionListing.getReservePrice());
+              
+    }
+    
+    public void doBrowseAllWonAuctions() {
+        
+         System.out.println("*** OAS Auction Client :: Auction Menu :: Browse All Won Auctions  ***\n");
+        
+        Scanner sc = new Scanner(System.in);
+        Integer response = 0;
+        
+        List<AuctionListing> auctionsWon = currentCustomer.getAuctionsWon();
+        
+        if (auctionsWon.isEmpty() == false) {
+            System.out.printf("%8s%16s%35s%12s\n", "Auction Listing ID", "Product Name", "Your Winning Bid", "Address");
+            for (AuctionListing auctionWon : auctionsWon) {
+                int size = auctionWon.getBids().size();
+                Bid winningBid = auctionWon.getBids().get(size - 1);
+                if (winningBid.getAddress() == null) {
+                    System.out.printf("%8s%26s%25s%12s\n", auctionWon.getAuctionListingId().toString(), auctionWon.getProductName(), auctionWon.getCurrentHighestPrice(), "Not Assigned");
+                } else {
+                    System.out.printf("%8s%26s%25s%12s\n", auctionWon.getAuctionListingId().toString(), auctionWon.getProductName(), auctionWon.getCurrentHighestPrice(), winningBid.getAddress().getPostalCode());
+                }
+            }
+             while(true) {
+                    System.out.println("1: Select Address For Won Auction Listing");
+                    System.out.println("2: Back\n");
+                    System.out.print("> ");
+                    response = 0;
+                    while(response < 1 || response > 2) {
+                        response = sc.nextInt();
+                        if(response == 1)
+                        {
+                            doSetAddress();
+                        }
+                        else if(response == 2)
+                        {
+                            break;
+                        } 
+                        else {
+                            System.out.println("Sorry, invalid option!");
+                        }
+                    }
+                    if (response == 2) {
+                        break;
+                    }
+                }
+        } else {
+            System.out.println("Sorry, you have not won any auctions yet!");
+        }
+    }
+    
+    public void doSetAddress() {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("*** OAS Auction Client :: Auction Menu :: Browse All Won Auctions :: Set Address For Won Auction Listing ***\n");
+        System.out.print("Enter Auction Listing ID> ");
+        
+        AuctionListing auctionListing = new AuctionListing();
+        
+        Long auctionListingId = sc.nextLong();
+        try {
+            auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
+            int size = auctionListing.getBids().size();
+            Bid winningBid = auctionListing.getBids().get(size - 1);
+            if (winningBid.getAddress() != null || !(winningBid.getCustomer().equals(currentCustomer))) {
+                System.out.println("Sorry, you did not win the selected auction or an address has already been selected for the won auction");
+                return;
+            }
+        } catch (AuctionListingNotFoundException ex) {
+            System.out.println("Error occurred :" + ex.getMessage());
+        }
+        
+        boolean noEnabled = true;
+        
+        if (!currentCustomer.getAddresses().isEmpty()) {
+            for (Address add:currentCustomer.getAddresses()) {
+                if (add.isEnabled()) {
+                    noEnabled = false;
+                }
+            }
+        }
+        
+        
+        if (currentCustomer.getAddresses().isEmpty() || noEnabled) {
+            System.out.println("You do have any address registered, please create a new address!");
+        }
+        
+        else {
+            System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
+            
+            for (Address add:currentCustomer.getAddresses()) {
+                if (add.isEnabled()) {
+                    System.out.printf("%8s%50s%50s%8s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
+                }
+            }
+            
+             System.out.print("Enter Address ID To Set To Won Auction> ");
+             Long addId = sc.nextLong();
+             try {
+                Address add = customerControllerRemote.retrieveAddressByAddressId(addId);
+                if (add.isEnabled() == false) {
+                    System.out.println("Sorry address is disabled");
+                    return;
+                } else {
+                    int size = auctionListing.getBids().size();
+                    Bid winningBid = auctionListing.getBids().get(size - 1);
+                    winningBid.setAddress(add);
+                    add.getBidsWon().add(winningBid);
+                    bidControllerRemote.updateBid(winningBid);
+                    customerControllerRemote.updateAddress(add);
+                    System.out.println("Address successfully set to bid!");
+                    
+                }
+             } catch(AddressNotFoundException ex) {
+                System.out.println("Error occurred :" + ex.getMessage());
+             
+            
+        }
+        
+    }
+    
+    
+            
+        
+        
+        
+        
+        
+        
+    }
 }

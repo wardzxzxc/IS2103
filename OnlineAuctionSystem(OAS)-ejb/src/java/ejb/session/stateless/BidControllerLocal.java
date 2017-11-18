@@ -24,5 +24,7 @@ public interface BidControllerLocal {
     public Bid retrieveBidById(Long bidId) throws BidNotFoundException;
 
     public Customer retrieveLinkedCustomer(Long bidId) throws BidNotFoundException;
+
+    public void updateBid(Bid bid);
     
 }

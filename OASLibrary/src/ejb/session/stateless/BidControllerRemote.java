@@ -5,7 +5,12 @@
  */
 package ejb.session.stateless;
 
+import entity.Bid;
+import entity.Customer;
 import javax.ejb.Remote;
+import util.exception.BidExistException;
+import util.exception.BidNotFoundException;
+import util.exception.GeneralException;
 
 /**
  *
@@ -13,5 +18,13 @@ import javax.ejb.Remote;
  */
 @Remote
 public interface BidControllerRemote {
+    
+    public Bid createNewBid(Bid bid) throws GeneralException, BidExistException;
+
+    public Bid retrieveBidById(Long bidId) throws BidNotFoundException;
+
+    public Customer retrieveLinkedCustomer(Long bidId) throws BidNotFoundException;
+    
+    public void updateBid(Bid bid);
     
 }
