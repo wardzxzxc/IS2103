@@ -57,7 +57,14 @@ public class SalesModule {
             while(response < 1 || response > 6) {
                 System.out.println("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if(response == 1) {
                     doCreateNewAuctionListing();
@@ -163,36 +170,65 @@ public class SalesModule {
         
         System.out.println("*** OAS Admin Panel :: Sales :: View Auction Listing Details ***\n");
         System.out.print("Enter Auction Listing ID> ");
+        
+        while(!sc.hasNextLong()) {
+            System.out.println("Invalid option, please try again!\n");
+            System.out.println("> ");
+            sc.nextLine();
+        }
         Long auctionListingId = sc.nextLong();
+        sc.nextLine();
         
-        DateFormat df = new SimpleDateFormat("dd/mm/yyyy, HH:mm");
-        
-        try
-        {
-            AuctionListing auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
-            System.out.printf("%8s%16s%30s%45s%35s%20s%12s%12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Expired");
-            System.out.printf("%8s%26s%40s%40s%25s%20s%18s%12s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice(), auctionListing.getReservePrice(), auctionListing.getActive(), auctionListing.getExpired());         
-            System.out.println("------------------------");
-            System.out.println("1: Update Auction Listing");
-            System.out.println("2: Delete Auction Listing");
-            System.out.println("3: Back\n");
-            System.out.print("> ");
-            response = sc.nextInt();
+        while(true) {
+            try {
+                AuctionListing auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
+                System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s%-12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Expired");
+                System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s%-12s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice().toString(), auctionListing.getReservePrice().toString(), auctionListing.getActive().toString(), auctionListing.getExpired().toString());         
+                System.out.println("------------------------");
+                System.out.println("1: Update Auction Listing");
+                System.out.println("2: Delete Auction Listing");
+                System.out.println("3: Back\n");
+                response = 0;
 
-            if(response == 1)
-            {
-                doUpdateAuctionListing(auctionListing);
+                while(response <1 || response >3) {
+
+                    System.out.print("> ");
+
+                    while(!sc.hasNextInt()) {
+                        System.out.println("Invalid option, please try again!\n");
+                        System.out.println("> ");
+                        sc.nextLine();
+                    }
+
+                    response = sc.nextInt();
+                    sc.nextLine();
+
+                    if(response == 1)
+                    {
+                        doUpdateAuctionListing(auctionListing);
+                    }
+                    else if(response == 2)
+                    {
+                        doDeleteAuctionListing(auctionListing);
+                    }
+                    else if(response == 3)
+                    {
+                        break;
+                    }
+                    else {
+                        System.out.println("Invalid option, please try again!\n");
+                    }
+                }
             }
-            else if(response == 2)
+            catch(AuctionListingNotFoundException ex)
             {
-                doDeleteAuctionListing(auctionListing);
+                System.out.println("An error has occurred while retrieving auction listing: " + ex.getMessage() + "\n");
+                break;
+            }
+            if(response == 3) {
+                break;
             }
         }
-        catch(AuctionListingNotFoundException ex)
-        {
-            System.out.println("An error has occurred while retrieving auction listing: " + ex.getMessage() + "\n");
-        }
-        
     }
     
     private void doUpdateAuctionListing(AuctionListing auctionListing) {
@@ -315,13 +351,13 @@ public class SalesModule {
         System.out.println("*** OAS Admin Panel :: Sales :: View All Auction Listings ***\n");
         
         List<AuctionListing> auctionListings = auctionListingControllerRemote.retrieveAllAuctionListing();
-        System.out.printf("%8s%16s%30s%45s%35s%20s%12s%12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Expired");
+        System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s%-12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Expired");
         
         for(AuctionListing listing:auctionListings) {
-            System.out.printf("%8s%26s%40s%40s%25s%20s%18s%12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice(), listing.getActive(), listing.getExpired());
+            System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s%-12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice().toString(), listing.getReservePrice().toString(), listing.getActive().toString(), listing.getExpired().toString());
         }
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
         
     }
@@ -333,11 +369,11 @@ public class SalesModule {
         System.out.println("*** OAS Admin Panel :: Sales :: View All Auction Listings Below Reserve Price ***\n");
         
         List<AuctionListing> auctionListings = auctionListingControllerRemote.retrieveAllAuctionListing();
-        System.out.printf("%%8s%16s%30s%45s%35s%20s%12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active");
+        System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active");
         
         for(AuctionListing listing:auctionListings) {
             if ((listing.getCurrentHighestPrice().compareTo(listing.getReservePrice()) < 0) && (listing.getExpired() == true)) {
-                System.out.printf("%8s%26s%40s%40s%25s%20s%18s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice(), listing.getActive());
+                System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice().toString(), listing.getReservePrice().toString(), listing.getActive().toString());
             }
         }
         
@@ -373,7 +409,7 @@ public class SalesModule {
         Scanner sc = new Scanner(System.in);
         
         System.out.println("*** OAS Admin Panel :: Sales :: Change My Password ***\n");
-        System.out.println("Enter old password> ");
+        System.out.println("Enter current password> ");
         String oldPassword = sc.next().trim();
         System.out.println("Enter new password> ");
         String newPassword = sc.next().trim();
@@ -381,16 +417,17 @@ public class SalesModule {
         String newPasswordAgain = sc.next().trim();
         
         if (!(newPassword.equals(newPasswordAgain))) {
-            System.out.println("Please make sure that both new passwords are the same");
-            return;
+            System.out.println("Please make sure that both new passwords are the same.");
         }
         
-        if (employee.getPassword().equals(oldPassword) && newPassword.equals(newPasswordAgain)) {
+        else if (employee.getPassword().equals(oldPassword)) {
             employee.setPassword(newPassword);
             employeeControllerRemote.updateEmployee(employee);
-        } else {
-            System.out.println("Old password does not match");
-            return;
+            System.out.println("Password changed successfully!");
+        }
+        
+        else {
+            System.out.println("Current password does not match, please try again.");
         }
         
     }

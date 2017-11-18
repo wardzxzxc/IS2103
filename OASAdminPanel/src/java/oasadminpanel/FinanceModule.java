@@ -49,7 +49,14 @@ public class FinanceModule {
             while(response < 1 || response > 5) {
                 System.out.println("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if(response == 1) {
                     doCreateNewCreditPackage();
@@ -81,19 +88,26 @@ public class FinanceModule {
     private void doCreateNewCreditPackage() {
         
         Scanner sc = new Scanner(System.in);
-        CreditPackage newCreditPackage = new CreditPackage();
         
         System.out.println("*** OAS Admin Panel :: Finance :: Create New Credit Package ***\n");
         System.out.print("Enter Credits Per Package> ");
-        newCreditPackage.setCreditPerPackage(sc.nextBigDecimal());
+        
+        while(!sc.hasNextBigDecimal()) {
+            System.out.println("Invalid option, please try again!\n");
+            System.out.println("> ");
+            sc.nextLine();
+        }
+        
+        CreditPackage newCreditPackage = new CreditPackage(true, sc.nextBigDecimal());
+        sc.nextLine();
         
         try {
             newCreditPackage = creditPackageControllerRemote.createNewCreditPackage(newCreditPackage);
+            System.out.println("New credit package (" + newCreditPackage.getCreditPerPackage() + ") created successfully!: " + newCreditPackage.getCreditPackageId().toString() + "\n");
         }
         catch (CreditPackageExistException | GeneralException ex) {
+            System.out.println("An error occurred: " + ex.getMessage());
         }
-        
-        System.out.println("New credit package (" + newCreditPackage.getCreditPerPackage() + ") created successfully!: " + newCreditPackage.getCreditPackageId() + "\n");
         
     }
     
@@ -104,14 +118,21 @@ public class FinanceModule {
         
         System.out.println("*** OAS Admin Panel :: Finance :: View Credit Package Details ***\n");
         System.out.print("Enter Credit Package ID> ");
+        
+        while(!sc.hasNextLong()) {
+            System.out.println("Invalid option, please try again!\n");
+            System.out.println("> ");
+            sc.nextLine();
+        }
+        
         Long creditPackageId = sc.nextLong();
         sc.nextLine();
         
         try
         {
             CreditPackage creditPackage = creditPackageControllerRemote.retrieveCreditPackageById(creditPackageId);
-            System.out.printf("%8s%20s%8s\n", "Credit Package ID", "Credits Per Package", "Enabled");
-            System.out.printf("%8s%20s%8s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled());         
+            System.out.printf("%-20s%-24s%-10s\n", "Credit Package ID", "Credits Per Package", "Enabled");
+            System.out.printf("%-20s%-24s%-10s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled().toString());         
             System.out.println("------------------------");
             System.out.println("1: Update Credit Package");
             System.out.println("2: Delete Credit Package");
@@ -142,10 +163,9 @@ public class FinanceModule {
         String input2;
         
         System.out.println("*** OAS Admin Panel :: Finance :: View Credit Package Details :: Update Credit Package ***\n");
-        System.out.print("Enter Credits Per Package (enter 0.0 if no change)> ");
+        System.out.print("Enter Credits Per Package (enter 0 if no change)> ");
         input1 = sc.nextBigDecimal();
-        if(input1.compareTo(new BigDecimal(0)) != 0)
-        {
+        if(input1.compareTo(BigDecimal.ZERO) != 0) {
             creditPackage.setCreditPerPackage(input1);
         }
         
@@ -179,14 +199,14 @@ public class FinanceModule {
         System.out.println("*** OAS Admin Panel :: Finance :: View All Credit Packages ***\n");
         
         List<CreditPackage> creditPackages = creditPackageControllerRemote.retrieveAllCreditPackage();
-        System.out.printf("%8s%20s%8s\n", "Credit Package ID", "Credits Per Package", "Enabled");
+        System.out.printf("%-20s%-24s%-10s\n", "Credit Package ID", "Credits Per Package", "Enabled");
 
         for(CreditPackage creditPackage:creditPackages)
         {
-            System.out.printf("%8s%20s%8s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage(), creditPackage.getEnabled());
+            System.out.printf("%-20s%-24s%-10s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled().toString());
         }
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
         
     }
@@ -219,21 +239,30 @@ public class FinanceModule {
         
     }
     
-        private void doChangeMyPassword(Employee employee) {
+    private void doChangeMyPassword(Employee employee) {
         
         Scanner sc = new Scanner(System.in);
         
-        System.out.println("*** OAS Admin Panel :: Finance :: Change My Password ***\n");
-        System.out.println("Enter old password> ");
+        System.out.println("*** OAS Admin Panel :: Sales :: Change My Password ***\n");
+        System.out.println("Enter current password> ");
         String oldPassword = sc.next().trim();
         System.out.println("Enter new password> ");
         String newPassword = sc.next().trim();
+        System.out.println("Enter new password again> ");
+        String newPasswordAgain = sc.next().trim();
         
-        if (employee.getPassword().equals(oldPassword)) {
+        if (!(newPassword.equals(newPasswordAgain))) {
+            System.out.println("Please make sure that both new passwords are the same.");
+        }
+        
+        else if (employee.getPassword().equals(oldPassword)) {
             employee.setPassword(newPassword);
             employeeControllerRemote.updateEmployee(employee);
-        } else {
-            System.out.println("Old password does not match");
+            System.out.println("Password changed successfully!");
+        }
+        
+        else {
+            System.out.println("Current password does not match, please try again.");
         }
         
     }

@@ -10,7 +10,6 @@ import entity.AuctionListing;
 import entity.Bid;
 import entity.Customer;
 import static entity.Employee_.employeeId;
-import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Local;
@@ -77,7 +76,7 @@ public class AuctionListingController implements AuctionListingControllerRemote,
             return (AuctionListing)query.getSingleResult();
         }
         catch(NoResultException | NonUniqueResultException ex) {
-            throw new AuctionListingNotFoundException("AuctionListing " + name + "does not exist");
+            throw new AuctionListingNotFoundException("Auction Listing " + name + " does not exist");
         }
     }
     

@@ -70,9 +70,6 @@ public class AuctionListing implements Serializable {
         this.productName = productName;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.active = false;
-        this.expired = false;
-      
     }
 
     public Bid getWinningBid() {
