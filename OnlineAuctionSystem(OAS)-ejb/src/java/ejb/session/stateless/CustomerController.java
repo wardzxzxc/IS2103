@@ -1,11 +1,14 @@
 package ejb.session.stateless;
 
 import entity.Address;
+import entity.AuctionListing;
+import entity.Bid;
 import entity.CreditPackage;
 import entity.CreditTransaction;
 import entity.Customer;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -94,23 +97,81 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
-    public void updateCustomer(Customer customer) {
+    public Customer updateCustomer(Customer customer) {
         
         em.merge(customer);
+        return customer;
         
     }
     
     @Override
     public Customer addNewAddress(Customer customer, Address address) {
         
-        em.persist(address);
-        em.flush();
-        em.refresh(address);
-        customer.getAddresses().add(address);
+        List<Address> allAdds = retrieveAllAddresses(customer.getUsername());
+        allAdds.add(address);
         address.setCustomer(customer);
         return customer;
         
     }
+    
+    @Override
+    public Address createAddress(Address add) {
+        em.persist(add);
+        em.flush();
+        em.refresh(add);
+        
+        return add;
+    }
+    
+    @Override
+    public List<Address> retrieveAllAddresses(String username) {
+        Customer customer = new Customer();
+        try {
+            customer = retrieveCustomerByUsername(username);
+            customer.getAddresses().size();
+        } catch (CustomerNotFoundException ex) {
+        
+        }
+        return customer.getAddresses();
+    }
+    
+    @Override
+     public List<Bid> retrieveAllBids(String username) {
+        Customer customer = new Customer();
+        try {
+            customer = retrieveCustomerByUsername(username);
+            customer.getBids().size();
+        } catch (CustomerNotFoundException ex) {
+        
+        }
+        return customer.getBids();
+    }
+     
+    @Override
+      public List<AuctionListing> retrieveAllAuctionsWon(String username) {
+        Customer customer = new Customer();
+        try {
+            customer = retrieveCustomerByUsername(username);
+            customer.getAuctionsWon().size();
+        } catch (CustomerNotFoundException ex) {
+        
+        }
+        return customer.getAuctionsWon();
+    }
+    
+    @Override
+    public List<CreditTransaction> retrieveAllCreditTransaction(String username) {
+        Customer customer = new Customer();
+        try {
+            customer = retrieveCustomerByUsername(username);
+            customer.getCreditTransactions().size();
+        } catch (CustomerNotFoundException ex) {
+        
+        }
+        return customer.getCreditTransactions();
+    }
+    
+    
     
     @Override
     public Address retrieveAddressByAddressId(Long addressId) throws AddressNotFoundException {
@@ -126,6 +187,19 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
+    public List<Bid> retrieveBidsWon(Long addressId) {
+        Address add = new Address();
+        try {
+            add = retrieveAddressByAddressId(addressId);
+            add.getBidsWon().size();
+        } catch (AddressNotFoundException ex) {
+        
+        }
+        
+        return add.getBidsWon();
+        }
+    
+    @Override
     public void updateAddress(Address address) {
         
         em.merge(address);
@@ -136,15 +210,17 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     public Customer deleteAddress(Long addressId) throws AddressNotFoundException {
         
         Address address = retrieveAddressByAddressId(addressId);
+        Customer customer = address.getCustomer();
         
         if (address != null) {
             em.remove(address);
             em.flush();
-            em.refresh(address);
-            return address.getCustomer();
+            em.refresh(customer);
         } else {
             throw new AddressNotFoundException("Address ID " + addressId.toString() + "does not exist");
         }
+        
+        return customer;
     }
     
     @Override
@@ -162,7 +238,8 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         em.persist(creditTransaction);
         em.flush();
         em.refresh(creditTransaction);
-        customer.getCreditTransaction().add(creditTransaction);
+        List<CreditTransaction> creditTransactions = retrieveAllCreditTransaction(customer.getUsername());
+        creditTransactions.add(creditTransaction);
         
         return customer;
         

@@ -30,7 +30,7 @@ public interface AuctionListingControllerRemote {
 
     public void deleteAuctionListing(Long auctionId) throws AuctionListingNotFoundException;
     
-    public List<Bid> retrieveLinkedBids(Long auctionId) throws AuctionListingNotFoundException;
+    public List<Bid> retrieveLinkedBids(Long auctionId);
     
     public void updateAuctionListing(AuctionListing auctionListing);
     

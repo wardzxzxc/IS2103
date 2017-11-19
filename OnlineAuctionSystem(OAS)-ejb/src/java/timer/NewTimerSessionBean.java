@@ -15,16 +15,23 @@ import javax.ejb.TimerService;
 import javax.ejb.TimerConfig;
 import datamodel.TimerInfo;
 import ejb.session.stateless.AuctionListingControllerLocal;
+import ejb.session.stateless.CustomerControllerLocal;
 import ejb.session.stateless.NewTimerSessionBeanRemote;
 import entity.AuctionListing;
 import entity.Bid;
+import entity.CreditTransaction;
 import entity.Customer;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.NoSuchObjectLocalException;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import util.enumeration.CreditTransactionTypeEnum;
 import util.exception.AuctionListingNotFoundException;
 
 /**
@@ -38,9 +45,18 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
     
     @EJB
     private AuctionListingControllerLocal auctionListingController;
+    
+    @EJB
+    private CustomerControllerLocal customerControllerLocal;
+    
 
     @Resource
     private SessionContext sessionContext;
+    
+    @PersistenceContext(unitName = "OnlineAuctionSystem_OAS_-ejbPU")
+    private EntityManager em;
+    
+    
 
     public NewTimerSessionBean() {
     }
@@ -137,14 +153,58 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
             auctionListing.setExpired(true);
             System.out.println("End Timer.handleTimeout(): " + timerInfo.getAuctionId().toString() + " " + timerInfo.getStart());
             System.out.println("End Timer.handleTimeout(): " + timerInfo.getAuctionId().toString() + " is now closed!");
-            Bid highestBid = auctionListingController.findLargestBid(auctionListing);
-            BigDecimal highestPrice = highestBid.getAmount();
+            List<Bid> allBids = new ArrayList<>();       
             
-            if (highestPrice.compareTo(auctionListing.getReservePrice()) > 0) {
-                Customer winner = highestBid.getCustomer();
-                winner.getAuctionsWon().add(auctionListing);
-                auctionListing.setWinner(winner);
-                auctionListingController.updateAuctionListing(auctionListing);
+            allBids = auctionListingController.retrieveLinkedBids(auctionListing.getAuctionListingId());
+
+          
+            
+            if (allBids.isEmpty() == true) {
+                return;
+            } else {
+            
+                Bid highestBid = auctionListingController.findLargestBid(auctionListing);
+                BigDecimal highestPrice = highestBid.getAmount();
+
+                if (highestPrice.compareTo(auctionListing.getReservePrice()) > 0) {
+                    Date date = new Date();
+                    Customer winner = highestBid.getCustomer();             
+                    List<AuctionListing> auctionsWon = customerControllerLocal.retrieveAllAuctionsWon(winner.getUsername());
+                    auctionsWon.add(auctionListing);
+                    winner.setCreditCurrBalance(winner.getCreditCurrBalance().subtract(highestBid.getAmount()));
+                    CreditTransaction winnerTransaction = new CreditTransaction();
+                    winnerTransaction.setAmount(highestPrice);
+                    winnerTransaction.setCreditTransactionType(CreditTransactionTypeEnum.WINNING_BID);
+                    winnerTransaction.setCustomer(winner);
+                    winnerTransaction.setTransactionDateTime(date);
+                    em.persist(winnerTransaction);
+                    em.flush();
+                    em.refresh(winnerTransaction);
+                    List<CreditTransaction> allCreditTransactions = customerControllerLocal.retrieveAllCreditTransaction(winner.getUsername());
+                    allCreditTransactions.add(winnerTransaction);
+                    em.refresh(winner);
+                    auctionListing.setWinner(winner);
+                    auctionListingController.updateAuctionListing(auctionListing);
+
+                    for (Bid bid : allBids) {
+                        if (!bid.equals(highestBid)) {
+                            BigDecimal amount = bid.getAmount();
+                            Customer bidder = bid.getCustomer();                        
+                            bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
+                            CreditTransaction refund = new CreditTransaction();
+                            refund.setAmount(amount);
+                            refund.setCustomer(bidder);
+                            refund.setTransactionDateTime(date);
+                            refund.setCreditTransactionType(CreditTransactionTypeEnum.REFUND);
+                            em.persist(refund);
+                            em.flush();
+                            em.refresh(refund);
+                            List<CreditTransaction> allCreditTransaction = customerControllerLocal.retrieveAllCreditTransaction(bidder.getUsername());
+                            allCreditTransaction.add(refund);
+                            em.refresh(bidder);
+                        }
+                    }
+                }
             }
         }
     }

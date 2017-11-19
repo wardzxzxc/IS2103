@@ -433,6 +433,8 @@ public class SalesModule {
                         auctionListingControllerRemote.updateAuctionListing(auctionListing);
                     } else if (response == 2) {
                         System.out.println("Auction ID " + auctionListing.getAuctionListingId() + " has been successfully closed with no winner.");
+                        System.out.println("All bids will be refunded.");
+                        auctionListingControllerRemote.refundBids(auctionListing);
                     } else if (response == 3){
                         break;
                     } else {
