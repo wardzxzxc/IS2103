@@ -33,21 +33,21 @@ public interface CustomerControllerLocal {
 
     public Address retrieveAddressByAddressId(Long addressId) throws AddressNotFoundException;
 
-    public void updateAddress(Address address);
+    public Customer updateAddress(Address address);
 
     public Customer deleteAddress(Long addressId) throws AddressNotFoundException;
 
-    public Customer purchaseCreditPackage(Customer customer, Long creditPackageId, int numUnits);
+    public Customer purchaseCreditPackage(Long customerId, Long creditPackageId, int numUnits);
 
-    public Address createAddress(Address add);
+    public Customer createAddress(Address add, Long customerId);
 
-    public List<Address> retrieveAllAddresses(String username);
+    public List<Address> retrieveAllAddresses(Long customerId);
 
     public List<Bid> retrieveAllBids(String username);
 
     public List<AuctionListing> retrieveAllAuctionsWon(String username);
 
-    public List<CreditTransaction> retrieveAllCreditTransaction(String username);
+    public List<CreditTransaction> retrieveAllCreditTransaction(Long customerId);
 
     public List<Bid> retrieveBidsWon(Long addressId);
     

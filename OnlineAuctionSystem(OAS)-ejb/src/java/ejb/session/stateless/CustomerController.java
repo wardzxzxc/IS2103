@@ -85,6 +85,8 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
             Customer customer = retrieveCustomerByUsername(username);
             
             if (customer.getPassword().equals(password)) {
+                customer.getAddresses().size();
+                customer.getCreditTransactions().size();
                 return customer;
             } else {
                 throw new InvalidLoginCredentialException("Username does not exist or invalid password");
@@ -100,6 +102,7 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     public Customer updateCustomer(Customer customer) {
         
         em.merge(customer);
+        em.flush();
         return customer;
         
     }
@@ -107,7 +110,7 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     @Override
     public Customer addNewAddress(Customer customer, Address address) {
         
-        List<Address> allAdds = retrieveAllAddresses(customer.getUsername());
+        List<Address> allAdds = retrieveAllAddresses(customer.getCustomerId());
         allAdds.add(address);
         address.setCustomer(customer);
         return customer;
@@ -115,23 +118,25 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
-    public Address createAddress(Address add) {
+    public Customer createAddress(Address add, Long customerId) {
+        
+        Customer customer = em.find(Customer.class, customerId);
+        
         em.persist(add);
         em.flush();
+        add.setCustomer(customer);
         em.refresh(add);
+        customer.getAddresses().add(add);
+        em.flush();
+        em.refresh(customer);
         
-        return add;
+        return customer;
     }
     
     @Override
-    public List<Address> retrieveAllAddresses(String username) {
-        Customer customer = new Customer();
-        try {
-            customer = retrieveCustomerByUsername(username);
-            customer.getAddresses().size();
-        } catch (CustomerNotFoundException ex) {
-        
-        }
+    public List<Address> retrieveAllAddresses(Long customerId) {
+        Customer customer = em.find(Customer.class, customerId);
+        customer.getAddresses().size();
         return customer.getAddresses();
     }
     
@@ -160,14 +165,9 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
-    public List<CreditTransaction> retrieveAllCreditTransaction(String username) {
-        Customer customer = new Customer();
-        try {
-            customer = retrieveCustomerByUsername(username);
-            customer.getCreditTransactions().size();
-        } catch (CustomerNotFoundException ex) {
-        
-        }
+    public List<CreditTransaction> retrieveAllCreditTransaction(Long customerId) {
+        Customer customer = em.find(Customer.class, customerId);
+        customer.getCreditTransactions().size();
         return customer.getCreditTransactions();
     }
     
@@ -200,35 +200,40 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         }
     
     @Override
-    public void updateAddress(Address address) {
+    public Customer updateAddress(Address address) {
         
         em.merge(address);
+        em.flush();
         
+        return address.getCustomer();
     }
     
     @Override
     public Customer deleteAddress(Long addressId) throws AddressNotFoundException {
         
-        Address address = retrieveAddressByAddressId(addressId);
-        Customer customer = address.getCustomer();
+        Address address = em.find(Address.class, addressId);
         
         if (address != null) {
+            Customer customer = address.getCustomer();
+            customer.getAddresses().remove(address);
+            em.refresh(customer);
             em.remove(address);
             em.flush();
-            em.refresh(customer);
+            return customer;
         } else {
             throw new AddressNotFoundException("Address ID " + addressId.toString() + "does not exist");
         }
         
-        return customer;
     }
     
     @Override
-    public Customer purchaseCreditPackage(Customer customer, Long creditPackageId, int numUnits) {
+    public Customer purchaseCreditPackage(Long customerId, Long creditPackageId, int numUnits) {
         
         Date transactionDateTime = new Date();
         
         CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
+        
+        Customer customer = em.find(Customer.class, customerId);
         
         BigDecimal purchasedAmount = creditPackage.getCreditPerPackage().multiply(new BigDecimal(numUnits));
         
@@ -238,8 +243,12 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         em.persist(creditTransaction);
         em.flush();
         em.refresh(creditTransaction);
-        List<CreditTransaction> creditTransactions = retrieveAllCreditTransaction(customer.getUsername());
-        creditTransactions.add(creditTransaction);
+        customer.getCreditTransactions().add(creditTransaction);
+        em.flush();
+        em.refresh(customer);
+        
+        customer.getCreditTransactions().size();
+        customer.getCreditCurrBalance();
         
         return customer;
         

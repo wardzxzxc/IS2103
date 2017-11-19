@@ -62,7 +62,14 @@ public class AuctionModule {
             while(response < 1 || response > 12) {
                 System.out.println("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if(response == 1) {
                     doViewProfile();
@@ -118,11 +125,11 @@ public class AuctionModule {
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Profile ***\n");
         
-        System.out.printf("%8s%20s%20s%15s%20s\n", "Customer ID", "First Name", "Last Name", "Contact Number", "Username");
+        System.out.printf("%-15s%-15s%-15s%-18s%-15s\n", "Customer ID", "First Name", "Last Name", "Contact Number", "Username");
 
-        System.out.printf("%8s%20s%20s%15s%20s\n", currentCustomer.getCustomerId().toString(), currentCustomer.getFirstName(), currentCustomer.getLastName(), currentCustomer.getContactNumber(), currentCustomer.getUsername());
+        System.out.printf("%-15s%-15s%-15s%-18s%-15s\n", currentCustomer.getCustomerId().toString(), currentCustomer.getFirstName(), currentCustomer.getLastName(), currentCustomer.getContactNumber(), currentCustomer.getUsername());
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
         
     }
@@ -148,41 +155,54 @@ public class AuctionModule {
                 
                 System.out.print("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
                 sc.nextLine();
                 
                 if (response == 1) {
-                   System.out.println("Enter New First Name> ");
+                   System.out.println("Enter new First Name> ");
                    String newFirstName = sc.nextLine().trim();
                    currentCustomer.setFirstName(newFirstName);
-                   customerControllerRemote.updateCustomer(currentCustomer);
+                   currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
                    System.out.println("First Name updated successfully!\n");
                 }
                 else if (response == 2) {
-                   System.out.println("Enter New Last Name> ");
+                   System.out.println("Enter new Last Name> ");
                    String newLastName = sc.nextLine().trim();
                    currentCustomer.setLastName(newLastName);
-                   customerControllerRemote.updateCustomer(currentCustomer);
+                   currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
                    System.out.println("Last Name updated successfully!\n");
                 }
                 else if (response == 3) {
-                   System.out.println("Enter New Contact Number> ");
+                   System.out.println("Enter new Contact Number> ");
                    String newContactNumber = sc.nextLine().trim();
                    currentCustomer.setContactNumber(newContactNumber);
-                   customerControllerRemote.updateCustomer(currentCustomer);
+                   currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
                    System.out.println("Contact Number updated successfully!\n");
                 }
                 else if (response == 4) {
-                    System.out.println("Enter New Password> ");
+                    System.out.println("Enter your new password> ");
                     String newPassword = sc.nextLine().trim();
-                    System.out.println("Enter Old Password> ");
+                    System.out.println("Enter your new password again>");
+                    String newPasswordAgain = sc.nextLine().trim();
+                    System.out.println("Enter your current password> ");
                     String oldPassword = sc.nextLine().trim();
-                    if (oldPassword.equals(currentCustomer.getPassword())) {
+                    
+                    if (!(newPassword.equals(newPasswordAgain))) {
+                        System.out.println("Please make sure both new passwords entered match.");
+                    }
+                    
+                    else if (oldPassword.equals(currentCustomer.getPassword())) {
                         currentCustomer.setPassword(newPassword);
-                        customerControllerRemote.updateCustomer(currentCustomer);
+                        currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
                         System.out.println("Password changed successfully!\n");
                     } else {
-                        System.out.println("Your old password entered does not match!");
+                        System.out.println("Current password entered does not match, please try again.");
                     }
                 }
                 else if (response == 5) {
@@ -207,21 +227,17 @@ public class AuctionModule {
         Scanner sc = new Scanner(System.in);
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: Create New Address ***\n");
-        
         System.out.println("Enter Address Line 1> ");
         String addressLine1 = sc.nextLine().trim();
-        System.out.print("Enter Address Line 2> ");
+        System.out.println("Enter Address Line 2> ");
         String addressLine2 = sc.nextLine().trim();
         System.out.println("Enter Postal Code> ");
         String postalCode = sc.nextLine().trim();
         
         Address newAddress = new Address(addressLine1, addressLine2, postalCode, currentCustomer);
         
-        newAddress = customerControllerRemote.createAddress(newAddress);
-        List<Address> allAdds = customerControllerRemote.retrieveAllAddresses(currentCustomer.getUsername());
-        allAdds.add(newAddress);
-        currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
-        System.out.println("Address created successfully! " + "AddressID : " + newAddress.getAddressId() + "\n");
+        currentCustomer = customerControllerRemote.createAddress(newAddress, currentCustomer.getCustomerId());
+        System.out.println("Address created successfully!\n");
     }
     
     public void doViewAddressDetails() {
@@ -231,14 +247,23 @@ public class AuctionModule {
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Address Details ***\n");
         System.out.print("Enter Address ID> ");
+        
+        while(!sc.hasNextLong()) {
+            System.out.println("Invalid option, please try again!\n");
+            System.out.println("Enter Address ID> ");
+            sc.nextLine();
+        }
+        
         Long addressId = sc.nextLong();
+        sc.nextLine();
+        
         Address address = null;
         
         try {
-                address = customerControllerRemote.retrieveAddressByAddressId(addressId);
+            address = customerControllerRemote.retrieveAddressByAddressId(addressId);
         }
         catch(AddressNotFoundException ex) {
-                System.out.println("An error has occurred while retrieving address: " + ex.getMessage() + "\n");
+            System.out.println("An error has occurred while retrieving address: " + ex.getMessage() + "\n");
         }
         
         while (address != null) {
@@ -248,8 +273,8 @@ public class AuctionModule {
                 break;
             }
 
-            System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
-            System.out.printf("%8s%50s%50s%8s\n", address.getAddressId().toString(), address.getAddressLine1(), address.getAddressLine2(), address.getPostalCode());
+            System.out.printf("%-12s%-25s%-18s%-15s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
+            System.out.printf("%-12s%-25s%-18s%-15s\n", address.getAddressId().toString(), address.getAddressLine1(), address.getAddressLine2(), address.getPostalCode());
             System.out.println("------------------------");
             System.out.println("1: Update Address");
             System.out.println("2: Delete Address");
@@ -306,29 +331,35 @@ public class AuctionModule {
                 
                 System.out.print("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
                 sc.nextLine();
                 
                 if (response == 1) {
-                   System.out.println("Enter New Address Line 1> ");
+                   System.out.println("Enter new Address Line 1> ");
                    String newAddressLine1 = sc.nextLine().trim();
                    address.setAddressLine1(newAddressLine1);
-                   customerControllerRemote.updateAddress(address);
+                   currentCustomer = customerControllerRemote.updateAddress(address);
                    System.out.println("Address Line 1 updated successfully!\n");
                 }
                 else if (response == 2) {
-                   System.out.println("Enter New Address Line 2> ");
+                   System.out.println("Enter new Address Line 2> ");
                    String newAddressLine2 = sc.nextLine().trim();
                    address.setAddressLine2(newAddressLine2);
-                   customerControllerRemote.updateAddress(address);
+                   currentCustomer = customerControllerRemote.updateAddress(address);
                    System.out.println("Address Line 2 updated successfully!\n");
                 }
                 else if (response == 3) {
-                   System.out.println("Enter New Postal Code> ");
+                   System.out.println("Enter new Postal Code> ");
                    String newPostalCode = sc.nextLine().trim();
                    address.setPostalCode(newPostalCode);
-                   customerControllerRemote.updateAddress(address);
-                   System.out.println("Postal code updated successfully!\n");
+                   currentCustomer = customerControllerRemote.updateAddress(address);
+                   System.out.println("Postal Code updated successfully!\n");
                 }
                 else if (response == 4) {
                     break;
@@ -353,11 +384,11 @@ public class AuctionModule {
         String input;
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Address Details :: Delete Address ***\n");
-        System.out.printf("Confirm Delete Address %s %s (Employee ID: %d) (Enter 'Y' to Delete) (Enter 'N' to Cancel and return to Update Address menu) ", address.getAddressLine1(), address.getAddressLine2(), address.getAddressId());
+        System.out.printf("Confirm Delete Address %s %s (Address ID: %d) (Enter 'Y' to Delete) (Enter 'N' to Cancel and return to Update Address Menu) ", address.getAddressLine1(), address.getAddressLine2(), address.getAddressId());
         input = sc.nextLine().trim();
         
-        if(input.equals("Y"))
-        {   if ((customerControllerRemote.retrieveBidsWon(address.getAddressId())).isEmpty()) {
+        if(input.equals("Y")) {   
+            if ((customerControllerRemote.retrieveBidsWon(address.getAddressId())).isEmpty()) {
                 try 
                 {
                     currentCustomer = customerControllerRemote.deleteAddress(address.getAddressId());
@@ -369,7 +400,7 @@ public class AuctionModule {
                 }
             } else {
                 address.setEnabled(false);
-                customerControllerRemote.updateAddress(address);
+                currentCustomer = customerControllerRemote.updateAddress(address);
             }
         }
         else if (input.equals("N"))
@@ -390,7 +421,7 @@ public class AuctionModule {
         
         boolean noEnabled = true;
         
-        List<Address> allAddresses = customerControllerRemote.retrieveAllAddresses(currentCustomer.getUsername());
+        List<Address> allAddresses = customerControllerRemote.retrieveAllAddresses(currentCustomer.getCustomerId());
         
         if (!(allAddresses.isEmpty())) {
             for (Address add : allAddresses) {
@@ -406,16 +437,16 @@ public class AuctionModule {
         }
         
         else {
-            System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
+            System.out.printf("%-12s%-25s%-18s%-15s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
             
             for (Address add : allAddresses) {
                 if (add.isEnabled()) {
-                    System.out.printf("%8s%50s%50s%8s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
+                    System.out.printf("%-12s%-25s%-18s%-15s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
                 }
             }
         }
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
         
     }
@@ -428,7 +459,7 @@ public class AuctionModule {
         
         System.out.println("Your current credit balance is: " + currentCustomer.getCreditCurrBalance().toString());
         
-        System.out.println("Press any key to continue...> ");
+        System.out.println("Press enter to continue...> ");
         sc.nextLine();
         
     }
@@ -444,14 +475,14 @@ public class AuctionModule {
         }
         
         else {
-            System.out.printf("%8s%10s%15s%50s\n", "Credit Transaction ID", "Amount", "Transaction Type", "Transaction Date Time");
+            System.out.printf("%-25s%-10s%-20s%-30s\n", "Credit Transaction ID", "Amount", "Transaction Type", "Transaction Date Time");
             
             for (CreditTransaction ct:currentCustomer.getCreditTransactions()) {
-                System.out.printf("%8s%10s%15s%50s\n", ct.getCreditTransactionId().toString(), ct.getAmount().toString(), ct.getCreditTransactionType().toString(), ct.getTransactionDateTime().toString());
+                System.out.printf("%-25s%-10s%-20s%-30s\n", ct.getCreditTransactionId().toString(), ct.getAmount().toString(), ct.getCreditTransactionType().toString(), ct.getTransactionDateTime().toString());
             }
         }
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
         
     }
@@ -466,12 +497,12 @@ public class AuctionModule {
         
         System.out.println("Available Credit Packages:\n");
         
-        System.out.printf("%8s%15s\n", "Credit Package ID", "Credits Per Package");
+        System.out.printf("%-25s%-25s\n", "Credit Package ID", "Credits Per Package");
         
         if (!creditPackages.isEmpty()) {
             for (CreditPackage cp:creditPackages) {
                 if (cp.getEnabled()) {
-                    System.out.printf("%8s%15s\n", cp.getCreditPackageId().toString(), cp.getCreditPerPackage().toString());
+                    System.out.printf("%-25s%-25s\n", cp.getCreditPackageId().toString(), cp.getCreditPerPackage().toString());
                 }
             }
         }
@@ -485,7 +516,7 @@ public class AuctionModule {
         int numUnits = sc.nextInt();
         sc.nextLine();
         
-        currentCustomer = customerControllerRemote.purchaseCreditPackage(currentCustomer, creditPackageId, numUnits);
+        currentCustomer = customerControllerRemote.purchaseCreditPackage(currentCustomer.getCustomerId(), creditPackageId, numUnits);
         System.out.println("Credit package purchased successfully!");
         
     }
@@ -497,14 +528,15 @@ public class AuctionModule {
         System.out.println("*** OAS Auction Client :: Auction Menu :: View All Auction Listings ***\n");
         
         List<AuctionListing> auctionListings = auctionListingControllerRemote.retrieveAllAuctionListing();
-        System.out.printf("%8s%16s%30s%45s%35s%20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
+        System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
         
         for(AuctionListing listing:auctionListings) {
-            if (listing.getActive() == true) {
-            System.out.printf("%8s%26s%40s%40s%25s%20s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice(), listing.getReservePrice());            }
+            if (listing.getActive()) {
+                System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice().toString(), listing.getReservePrice().toString());
+            }
         }
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
     }
     
@@ -522,8 +554,8 @@ public class AuctionModule {
         {
             AuctionListing auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
             if (auctionListing.getActive() == true) {
-                System.out.printf("%8s%16s%30s%45s%35s%20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
-                System.out.printf("%8s%26s%40s%40s%25s%20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice(), auctionListing.getReservePrice());         
+                System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
+                System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice().toString(), auctionListing.getReservePrice().toString());         
                 System.out.println("------------------------");
                 while(true) {
                     System.out.println("1: Place New Bid");
@@ -620,8 +652,8 @@ public class AuctionModule {
     
     public void doRefreshAuctionListingBid(AuctionListing auctionListing) {
         
-        System.out.printf("%8s%16s%30s%45s%35s%20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
-        System.out.printf("%8s%26s%40s%40s%25s%20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice(), auctionListing.getReservePrice());
+        System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
+        System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice().toString(), auctionListing.getReservePrice().toString());
               
     }
     

@@ -180,7 +180,7 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
                     em.persist(winnerTransaction);
                     em.flush();
                     em.refresh(winnerTransaction);
-                    List<CreditTransaction> allCreditTransactions = customerControllerLocal.retrieveAllCreditTransaction(winner.getUsername());
+                    List<CreditTransaction> allCreditTransactions = customerControllerLocal.retrieveAllCreditTransaction(winner.getCustomerId());
                     allCreditTransactions.add(winnerTransaction);
                     em.refresh(winner);
                     auctionListing.setWinner(winner);
@@ -199,7 +199,7 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
                             em.persist(refund);
                             em.flush();
                             em.refresh(refund);
-                            List<CreditTransaction> allCreditTransaction = customerControllerLocal.retrieveAllCreditTransaction(bidder.getUsername());
+                            List<CreditTransaction> allCreditTransaction = customerControllerLocal.retrieveAllCreditTransaction(bidder.getCustomerId());
                             allCreditTransaction.add(refund);
                             em.refresh(bidder);
                         }

@@ -47,7 +47,14 @@ public class MainApp {
             while(response <1 || response >3) {
                 System.out.println("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if(response == 1) {
                     doRegister();
@@ -55,7 +62,8 @@ public class MainApp {
                 else if(response == 2) {
                     try {
                         doLogin();
-                        
+                        AuctionModule auctionModule = new AuctionModule(customerControllerRemote, creditPackageControllerRemote,  auctionListingControllerRemote, bidControllerRemote, currentCustomer);
+                        auctionModule.auctionMenu();
                     }
                     catch (InvalidLoginCredentialException ex) {
                         
@@ -125,8 +133,6 @@ public class MainApp {
             {                   
                 currentCustomer = customerControllerRemote.customerLogin(username, password);
                 System.out.println("Login successful!\n");
-                AuctionModule auctionModule = new AuctionModule(customerControllerRemote, creditPackageControllerRemote,  auctionListingControllerRemote, bidControllerRemote, currentCustomer);
-                auctionModule.auctionMenu();
             }        
             catch (InvalidLoginCredentialException ex)
             {
