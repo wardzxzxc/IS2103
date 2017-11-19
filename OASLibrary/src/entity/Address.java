@@ -30,6 +30,7 @@ public class Address implements Serializable {
     @Column(length = 6, nullable = false, unique = true)
     private String postalCode;
     private boolean enabled;
+    private boolean used;
     
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
@@ -39,6 +40,7 @@ public class Address implements Serializable {
 
     public Address() {
         this.bidsWon = new ArrayList<>();
+        this.used = false;
     }
 
     public Address(String addressLine1, String addressLine2, String postalCode, Customer customer) {
@@ -47,6 +49,7 @@ public class Address implements Serializable {
         this.postalCode = postalCode;
         this.customer = customer;
         this.enabled = true;
+        this.used = false;
     }
 
     public Customer getCustomer() {
@@ -55,6 +58,14 @@ public class Address implements Serializable {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public boolean isUsed() {
+        return used;
+    }
+
+    public void setUsed(boolean used) {
+        this.used = used;
     }
     
 

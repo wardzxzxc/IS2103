@@ -11,6 +11,7 @@ import entity.Bid;
 import entity.CreditTransaction;
 import entity.Customer;
 import static entity.Employee_.employeeId;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
@@ -43,6 +44,9 @@ public class AuctionListingController implements AuctionListingControllerRemote,
     
     @EJB
     private NewTimerSessionBeanLocal newTimerSessionBean;
+    
+    @EJB
+    private CustomerControllerLocal customerControllerLocal;
     
     @Override
     public AuctionListing createNewAuctionListing (AuctionListing auctionListing) throws AuctionListingExistException, GeneralException {
@@ -131,35 +135,100 @@ public class AuctionListingController implements AuctionListingControllerRemote,
     
     @Override   
     public Bid findLargestBid(AuctionListing auctionListing) {
-        auctionListing.getBids().size();
-        List<Bid> bids = auctionListing.getBids();
-        Bid highestBid = bids.get(bids.size() - 1);
+        List<Bid> allBids = retrieveLinkedBids(auctionListing.getAuctionListingId());
+        Bid highestBid = allBids.get(allBids.size() - 1);
         
         return highestBid;
     }
     
-//    @Override
-//    public void refundBidsExceptWinningBid(Auction auctionListing)
+    @Override
+    public AuctionListing addBid(Bid bid, Long auctionId) {
+        AuctionListing auction = em.find(AuctionListing.class, auctionId);
+        auction.getBids().add(bid);
+        em.flush();
+        em.refresh(auction);
+        
+        return auction;
+    }
     
     @Override
     public void refundBids(AuctionListing auctionListing) {
-        List<Bid> allBids = auctionListing.getBids();
+        List<Bid> allBids = retrieveLinkedBids(auctionListing.getAuctionListingId());
         for (Bid bid : allBids) {
             Date date = new Date();
             Customer bidder = bid.getCustomer();
             bidder.setCreditCurrBalance((bidder.getCreditCurrBalance()).add(bid.getAmount()));
-            CreditTransaction refund = new CreditTransaction();
-            refund.setAmount(bid.getAmount());
-            refund.setCustomer(bidder);
-            refund.setTransactionDateTime(date);
-            refund.setCreditTransactionType(CreditTransactionTypeEnum.REFUND);
+            CreditTransaction refund = new CreditTransaction(date, bid.getAmount(), CreditTransactionTypeEnum.REFUND, bidder);
             em.persist(refund);
             em.flush();
             em.refresh(refund);
-            bidder.getCreditTransactions().add(refund);
+            customerControllerLocal.addCredTransaction(refund, bidder.getCustomerId());
             em.refresh(bidder);
             
         }
+    }
+    
+    @Override
+    public Customer findAndRefundBid(Long auctionId, Long customerId) {
+        List<Bid> allBids = retrieveLinkedBids(auctionId);
+        Customer customer = em.find(Customer.class, customerId);
+        for (Bid bid : allBids) {
+            if (bid.getCustomer().getCustomerId().equals(customerId)) {
+                customer.setCreditCurrBalance(customer.getCreditCurrBalance().add(bid.getAmount()));
+                CreditTransaction ct = new CreditTransaction(new Date(), bid.getAmount(), CreditTransactionTypeEnum.REFUND, customer);
+                customerControllerLocal.addCredTransaction(ct, customerId);
+                em.persist(ct);
+                em.flush();
+                em.refresh(ct);
+                em.remove(bid);
+                em.refresh(customer);
+            }
+        }
+        
+        return customer;
+    }
+    
+    @Override
+    public AuctionListing closeAuctionAboveReserve(Long auctionId) {
+        AuctionListing auctionListing = em.find(AuctionListing.class, auctionId);
+        List<Bid> allBids = retrieveLinkedBids(auctionId);
+        Bid highestBid = allBids.get(allBids.size() - 1);
+        BigDecimal highestPrice = highestBid.getAmount();
+
+        Date date = new Date();
+        Customer winner = em.find(Customer.class, highestBid.getCustomer().getCustomerId());         
+        List<AuctionListing> auctionsWon = customerControllerLocal.retrieveAllAuctionsWon(winner.getCustomerId());
+        auctionsWon.add(auctionListing);
+        winner.setCreditCurrBalance(winner.getCreditCurrBalance().subtract(highestBid.getAmount()));
+        CreditTransaction winnerTransaction = new CreditTransaction(date, highestPrice, CreditTransactionTypeEnum.WINNING_BID, winner);
+        em.persist(winnerTransaction);
+        em.flush();
+        em.refresh(winnerTransaction);
+        List<CreditTransaction> allCreditTransactions = customerControllerLocal.retrieveAllCreditTransaction(winner.getCustomerId());
+        allCreditTransactions.add(winnerTransaction);
+        em.refresh(winner);
+        auctionListing.setWinner(winner);
+        updateAuctionListing(auctionListing);
+        em.flush();
+
+        for (Bid bid : allBids) {
+                BigDecimal amount = bid.getAmount();
+                Customer bidder = bid.getCustomer();                        
+                bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
+                CreditTransaction refund = new CreditTransaction(date, amount, CreditTransactionTypeEnum.REFUND, bidder);
+                em.persist(refund);
+                em.flush();
+                em.refresh(refund);
+                List<CreditTransaction> allCreditTransaction = customerControllerLocal.retrieveAllCreditTransaction(bidder.getCustomerId());
+                allCreditTransaction.add(refund);
+                em.flush();
+                em.refresh(bidder);
+
+            }
+                
+
+                
+            return auctionListing;
     }
     
     

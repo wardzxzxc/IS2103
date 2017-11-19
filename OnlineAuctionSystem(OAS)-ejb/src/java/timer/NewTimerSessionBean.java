@@ -156,54 +156,15 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
             List<Bid> allBids = new ArrayList<>();       
             
             allBids = auctionListingController.retrieveLinkedBids(auctionListing.getAuctionListingId());
-
-          
-            
             if (allBids.isEmpty() == true) {
                 return;
             } else {
-            
                 Bid highestBid = auctionListingController.findLargestBid(auctionListing);
                 BigDecimal highestPrice = highestBid.getAmount();
-
                 if (highestPrice.compareTo(auctionListing.getReservePrice()) > 0) {
-                    Date date = new Date();
-                    Customer winner = highestBid.getCustomer();             
-                    List<AuctionListing> auctionsWon = customerControllerLocal.retrieveAllAuctionsWon(winner.getUsername());
-                    auctionsWon.add(auctionListing);
-                    winner.setCreditCurrBalance(winner.getCreditCurrBalance().subtract(highestBid.getAmount()));
-                    CreditTransaction winnerTransaction = new CreditTransaction();
-                    winnerTransaction.setAmount(highestPrice);
-                    winnerTransaction.setCreditTransactionType(CreditTransactionTypeEnum.WINNING_BID);
-                    winnerTransaction.setCustomer(winner);
-                    winnerTransaction.setTransactionDateTime(date);
-                    em.persist(winnerTransaction);
-                    em.flush();
-                    em.refresh(winnerTransaction);
-                    List<CreditTransaction> allCreditTransactions = customerControllerLocal.retrieveAllCreditTransaction(winner.getCustomerId());
-                    allCreditTransactions.add(winnerTransaction);
-                    em.refresh(winner);
-                    auctionListing.setWinner(winner);
-                    auctionListingController.updateAuctionListing(auctionListing);
-
-                    for (Bid bid : allBids) {
-                        if (!bid.equals(highestBid)) {
-                            BigDecimal amount = bid.getAmount();
-                            Customer bidder = bid.getCustomer();                        
-                            bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
-                            CreditTransaction refund = new CreditTransaction();
-                            refund.setAmount(amount);
-                            refund.setCustomer(bidder);
-                            refund.setTransactionDateTime(date);
-                            refund.setCreditTransactionType(CreditTransactionTypeEnum.REFUND);
-                            em.persist(refund);
-                            em.flush();
-                            em.refresh(refund);
-                            List<CreditTransaction> allCreditTransaction = customerControllerLocal.retrieveAllCreditTransaction(bidder.getCustomerId());
-                            allCreditTransaction.add(refund);
-                            em.refresh(bidder);
-                        }
-                    }
+                    auctionListingController.closeAuctionAboveReserve(auctionListing.getAuctionListingId());
+                } else {
+                    return;
                 }
             }
         }

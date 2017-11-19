@@ -45,11 +45,13 @@ public interface CustomerControllerRemote {
 
     public List<Bid> retrieveAllBids(String username);
 
-    public List<AuctionListing> retrieveAllAuctionsWon(String username);
+    public List<AuctionListing> retrieveAllAuctionsWon(Long customerId);
 
     public List<CreditTransaction> retrieveAllCreditTransaction(Long customerId);
     
     public List<Bid> retrieveBidsWon(Long addressId);
+    
+    public Customer addCredTransaction(CreditTransaction ct, Long customerId);
     
       
       

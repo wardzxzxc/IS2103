@@ -2,6 +2,7 @@ package oasadminpanel;
 
 import ejb.session.stateless.AuctionListingControllerRemote;
 import ejb.session.stateless.CreditPackageControllerRemote;
+import ejb.session.stateless.CustomerControllerRemote;
 import ejb.session.stateless.EmployeeControllerRemote;
 import ejb.session.stateless.NewTimerSessionBeanRemote;
 import entity.Employee;
@@ -14,6 +15,7 @@ public class MainApp {
     private EmployeeControllerRemote employeeControllerRemote;
     private CreditPackageControllerRemote creditPackageControllerRemote;
     private AuctionListingControllerRemote auctionListingControllerRemote;
+    private CustomerControllerRemote customerControllerRemmote;
     
     private SystemAdministrationModule systemAdministrationModule;
     private FinanceModule financeModule;
@@ -26,11 +28,12 @@ public class MainApp {
     public MainApp() {
     }
 
-    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, NewTimerSessionBeanRemote timerSessionBeanRemote) {
+    public MainApp(EmployeeControllerRemote employeeControllerRemote, CreditPackageControllerRemote creditPackageControllerRemote, AuctionListingControllerRemote auctionListingControllerRemote, NewTimerSessionBeanRemote timerSessionBeanRemote, CustomerControllerRemote customerControllerRemmote ) {
         this.employeeControllerRemote = employeeControllerRemote;
         this.creditPackageControllerRemote = creditPackageControllerRemote;
         this.auctionListingControllerRemote = auctionListingControllerRemote;
         this.timerSessionBeanRemote = timerSessionBeanRemote;
+        this.customerControllerRemmote = customerControllerRemmote;
     }
     
     
@@ -69,7 +72,7 @@ public class MainApp {
                             financeModule = new FinanceModule(creditPackageControllerRemote, employeeControllerRemote, currentEmployee);
                             financeModule.financeMenu();
                         } else {
-                            salesModule = new SalesModule(auctionListingControllerRemote, employeeControllerRemote, currentEmployee, timerSessionBeanRemote);
+                            salesModule = new SalesModule(auctionListingControllerRemote, employeeControllerRemote, currentEmployee, timerSessionBeanRemote, customerControllerRemmote);
                             salesModule.salesMenu();
                         }
                     }

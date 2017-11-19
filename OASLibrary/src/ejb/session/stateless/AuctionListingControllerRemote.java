@@ -2,6 +2,7 @@ package ejb.session.stateless;
 
 import entity.AuctionListing;
 import entity.Bid;
+import entity.Customer;
 import java.util.List;
 import util.exception.AuctionListingExistException;
 import util.exception.AuctionListingNotFoundException;
@@ -27,4 +28,10 @@ public interface AuctionListingControllerRemote {
     public Bid findLargestBid(AuctionListing auctionListing);
     
     public void refundBids(AuctionListing auctionListing);
+    
+    public AuctionListing addBid(Bid bid, Long auctionId);
+    
+    public Customer findAndRefundBid(Long auctionId, Long customerId);
+    
+    public AuctionListing closeAuctionAboveReserve(Long auctionId);
 }

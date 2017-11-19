@@ -153,14 +153,10 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
      
     @Override
-      public List<AuctionListing> retrieveAllAuctionsWon(String username) {
-        Customer customer = new Customer();
-        try {
-            customer = retrieveCustomerByUsername(username);
-            customer.getAuctionsWon().size();
-        } catch (CustomerNotFoundException ex) {
+      public List<AuctionListing> retrieveAllAuctionsWon(Long customerId) {
+        Customer customer = em.find(Customer.class, customerId);
+        customer.getAuctionsWon().size();
         
-        }
         return customer.getAuctionsWon();
     }
     
@@ -169,6 +165,15 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         Customer customer = em.find(Customer.class, customerId);
         customer.getCreditTransactions().size();
         return customer.getCreditTransactions();
+    }
+    
+    @Override
+    public Customer addCredTransaction(CreditTransaction ct, Long customerId) {
+        Customer customer = em.find(Customer.class, customerId);
+        customer.getCreditTransactions().add(ct);
+        return customer;
+        
+        
     }
     
     

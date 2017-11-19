@@ -1,6 +1,7 @@
 package oasadminpanel;
 
 import ejb.session.stateless.AuctionListingControllerRemote;
+import ejb.session.stateless.CustomerControllerRemote;
 import ejb.session.stateless.EmployeeControllerRemote;
 import ejb.session.stateless.NewTimerSessionBeanRemote;
 import entity.AuctionListing;
@@ -27,16 +28,18 @@ public class SalesModule {
     private AuctionListingControllerRemote auctionListingControllerRemote;
     private EmployeeControllerRemote employeeControllerRemote;
     private NewTimerSessionBeanRemote timerSessionBeanRemote;
+    private CustomerControllerRemote customerControllerRemote;
     
     private Employee currentEmployee;
     public SalesModule() {
     }
 
-    public SalesModule(AuctionListingControllerRemote auctionListingControllerRemote, EmployeeControllerRemote employeeControllerRemote, Employee currentEmployee, NewTimerSessionBeanRemote timerSessionBeanRemote) {
+    public SalesModule(AuctionListingControllerRemote auctionListingControllerRemote, EmployeeControllerRemote employeeControllerRemote, Employee currentEmployee, NewTimerSessionBeanRemote timerSessionBeanRemote, CustomerControllerRemote customerControllerRemote) {
         this.auctionListingControllerRemote = auctionListingControllerRemote;
         this.employeeControllerRemote = employeeControllerRemote;
         this.currentEmployee = currentEmployee;
         this.timerSessionBeanRemote = timerSessionBeanRemote;
+        this.customerControllerRemote = customerControllerRemote;
     }
     
     public void salesMenu() {
@@ -444,7 +447,7 @@ public class SalesModule {
         try {
             auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionId);
             
-            if (auctionListing.getExpired() && (auctionListing.getCurrentHighestPrice().compareTo(auctionListing.getReservePrice()) < 0)) {
+            if (auctionListing.getExpired() && (auctionListing.getCurrentHighestPrice().compareTo(auctionListing.getReservePrice()) > 0)) {
                 System.out.println("Sorry Auction ID " + auctionListing.getAuctionListingId() + " has a highest bid that is greater than the reserve price");
                 return;       
             }
@@ -463,10 +466,7 @@ public class SalesModule {
                 while(response < 1 || response > 2) {
                     response = sc.nextInt();
                     if (response == 1) {
-                        Customer customer = highestBid.getCustomer();
-                        auctionListing.setWinner(customer);
-                        customer.getAuctionsWon().add(auctionListing);
-                        System.out.println("Winning bid is assigned to Customer ID: " + customer.getCustomerId());
+                        auctionListing = auctionListingControllerRemote.closeAuctionAboveReserve(auctionId);
                         auctionListingControllerRemote.updateAuctionListing(auctionListing);
                     } else if (response == 2) {
                         System.out.println("Auction ID " + auctionListing.getAuctionListingId() + " has been successfully closed with no winner.");

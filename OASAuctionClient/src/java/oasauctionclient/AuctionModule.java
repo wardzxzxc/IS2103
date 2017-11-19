@@ -11,8 +11,10 @@ import entity.CreditPackage;
 import entity.CreditTransaction;
 import entity.Customer;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import util.enumeration.CreditTransactionTypeEnum;
 import util.exception.AddressNotFoundException;
 import util.exception.AuctionListingNotFoundException;
 import util.exception.BidExistException;
@@ -90,7 +92,7 @@ public class AuctionModule {
                     doViewCreditBalance();
                 }
                 else if(response == 7) {
-                    doViewCreditTransactionHistory();
+                    doViewCreditTransactionHistory(currentCustomer.getCustomerId());
                 }
                 else if(response == 8) {
                     doPurchaseCreditPackage();
@@ -289,7 +291,7 @@ public class AuctionModule {
 
                 if(response == 1)
                 {
-                    doUpdateAddress(address);
+                    address = doUpdateAddress(address);
                 }
                 else if(response == 2)
                 {
@@ -304,14 +306,14 @@ public class AuctionModule {
                     System.out.println("Invalid option, please try again!\n");
                 }
             }
-            if (response == 3) {
+            if (response == 2 || response == 3) {
                 break;
             }
         }
         
     }
     
-    public void doUpdateAddress(Address address) {
+    public Address doUpdateAddress(Address address) {
         
         Scanner sc = new Scanner(System.in);   
         
@@ -374,7 +376,11 @@ public class AuctionModule {
                 break;
             }
             
+           
+            
         }
+        
+         return address;
         
     }
     
@@ -388,7 +394,7 @@ public class AuctionModule {
         input = sc.nextLine().trim();
         
         if(input.equals("Y")) {   
-            if ((customerControllerRemote.retrieveBidsWon(address.getAddressId())).isEmpty()) {
+            if (address.isUsed() == false) {
                 try 
                 {
                     currentCustomer = customerControllerRemote.deleteAddress(address.getAddressId());
@@ -400,6 +406,7 @@ public class AuctionModule {
                 }
             } else {
                 address.setEnabled(false);
+                System.out.println("Address disabled succesfully, it cannot be used in the future.");
                 currentCustomer = customerControllerRemote.updateAddress(address);
             }
         }
@@ -464,20 +471,21 @@ public class AuctionModule {
         
     }
     
-    public void doViewCreditTransactionHistory() {
+    public void doViewCreditTransactionHistory(Long customerId) {
         
         Scanner sc = new Scanner(System.in);
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Credit Transaction History ***\n");        
+        List<CreditTransaction> allCredTrans = customerControllerRemote.retrieveAllCreditTransaction(customerId);
         
-        if (currentCustomer.getCreditTransactions().isEmpty()) {
-            System.out.println("You do have any credit transaction history!");
+        if (allCredTrans.isEmpty()) {
+            System.out.println("You do have any credit transaction history yet!");
         }
         
         else {
-            System.out.printf("%-25s%-10s%-20s%-30s\n", "Credit Transaction ID", "Amount", "Transaction Type", "Transaction Date Time");
+            System.out.printf("%-25s%-15s%-20s%-30s\n", "Credit Transaction ID", "Amount", "Transaction Type", "Transaction Date Time");
             
-            for (CreditTransaction ct:currentCustomer.getCreditTransactions()) {
+            for (CreditTransaction ct : allCredTrans) {
                 System.out.printf("%-25s%-10s%-20s%-30s\n", ct.getCreditTransactionId().toString(), ct.getAmount().toString(), ct.getCreditTransactionType().toString(), ct.getTransactionDateTime().toString());
             }
         }
@@ -553,9 +561,10 @@ public class AuctionModule {
         try
         {
             AuctionListing auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
+            auctionListingControllerRemote.updateAuctionListing(auctionListing);
             if (auctionListing.getActive() == true) {
-                System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
-                System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice().toString(), auctionListing.getReservePrice().toString());         
+                System.out.printf("%-20s%-25s%-25s%-30s%-30s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
+                System.out.printf("%-20s%-25s%-25s%-30s%-30s%-20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice().toString(), auctionListing.getReservePrice().toString());         
                 System.out.println("------------------------");
                 while(true) {
                     System.out.println("1: Place New Bid");
@@ -567,11 +576,11 @@ public class AuctionModule {
                         response = sc.nextInt();
                         if(response == 1)
                         {
-                            doPlaceNewBid(auctionListing);
+                            doPlaceNewBid(auctionListingId);
                         }
                         else if(response == 2)
                         {
-                            doRefreshAuctionListingBid(auctionListing);
+                            doRefreshAuctionListingBid(auctionListingId);
                         } else if (response == 3) {
                             break;
                         } else {
@@ -593,12 +602,16 @@ public class AuctionModule {
         }
     }
     
-    public void doPlaceNewBid(AuctionListing auctionListing) {
+    public void doPlaceNewBid(Long auctionListingId) {
         
          System.out.println("*** OAS Auction Client :: Auction Menu :: View Auction Listing Details :: Place New Bid ***\n");
-         
-         Bid bidPlaced = new Bid();
-         bidPlaced.setCustomer(currentCustomer);
+         AuctionListing auctionListing = new AuctionListing();
+         try {
+            auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
+         } catch (AuctionListingNotFoundException ex) {
+             System.out.println("Error occurred : " + ex.getMessage());
+         }
+         Bid bidPlaced = new Bid(BigDecimal.ZERO, currentCustomer, auctionListing);
          
          BigDecimal highestBid = auctionListing.getCurrentHighestPrice();
          
@@ -634,27 +647,44 @@ public class AuctionModule {
              bidPlaced.setAmount(highestBid.add(increment));
          }
          
-         try {
-             bidControllerRemote.createNewBid(bidPlaced);
-         } catch(BidExistException | GeneralException ex) {
-              System.out.println("An error occurred: " + ex.getMessage() + "\n");
+        if (!(auctionListingControllerRemote.retrieveLinkedBids(auctionListing.getAuctionListingId()).isEmpty())) {
+              currentCustomer = auctionListingControllerRemote.findAndRefundBid(auctionListing.getAuctionListingId(), currentCustomer.getCustomerId());
          }
-         
-        List<Bid> allBids = auctionListingControllerRemote.retrieveLinkedBids(auctionListing.getAuctionListingId());
-         
-         allBids.add(bidPlaced);
-         auctionListing.setCurrentHighestPrice(bidPlaced.getAmount());
-         auctionListingControllerRemote.updateAuctionListing(auctionListing);
             
-         System.out.println("Bid of " + bidPlaced.getAmount().toString() + " has been placed successfully");
+        if(bidPlaced.getAmount().compareTo(currentCustomer.getCreditCurrBalance()) <= 0) {
+                try {
+                    bidPlaced = bidControllerRemote.createNewBid(bidPlaced);
+                    currentCustomer.setCreditCurrBalance(currentCustomer.getCreditCurrBalance().subtract(bidPlaced.getAmount()));
+                    currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
+                    CreditTransaction credTran = new CreditTransaction(new Date(), bidPlaced.getAmount(), CreditTransactionTypeEnum.BIDDING, currentCustomer);
+                    currentCustomer = customerControllerRemote.addCredTransaction(credTran, currentCustomer.getCustomerId());
+                    currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
+                    auctionListing = auctionListingControllerRemote.addBid(bidPlaced, auctionListing.getAuctionListingId());
+                    auctionListing.setCurrentHighestPrice(bidPlaced.getAmount());
+                    auctionListingControllerRemote.updateAuctionListing(auctionListing);
+                    customerControllerRemote.updateCustomer(currentCustomer);
+            
+                    System.out.println("Bid of " + bidPlaced.getAmount().toString() + " has been placed successfully");
+                } catch(BidExistException | GeneralException ex) {
+                     System.out.println("An error occurred: " + ex.getMessage() + "\n");
+                }
+         } else {
+             System.out.println("Sorry, you do not have enough credits! Please top up.");
+             return;
+        } 
         
     }
     
-    public void doRefreshAuctionListingBid(AuctionListing auctionListing) {
+    public void doRefreshAuctionListingBid(Long auctionId) {
+        try {
+        AuctionListing auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionId);
         
         System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price");
         System.out.printf("%-20s%-25s%-25s%-25s%-25s%-20s\n", auctionListing.getAuctionListingId().toString(), auctionListing.getProductName(), auctionListing.getStartDateTime().toString(), auctionListing.getEndDateTime().toString(), auctionListing.getCurrentHighestPrice().toString(), auctionListing.getReservePrice().toString());
-              
+        }
+        catch (AuctionListingNotFoundException ex) {
+            System.out.println("Error occurred: " + ex.getMessage());
+        }
     }
     
     public void doBrowseAllWonAuctions() {
@@ -664,13 +694,12 @@ public class AuctionModule {
         Scanner sc = new Scanner(System.in);
         Integer response = 0;
         
-        List<AuctionListing> auctionsWon = currentCustomer.getAuctionsWon();
+        List<AuctionListing> auctionsWon = customerControllerRemote.retrieveAllAuctionsWon(currentCustomer.getCustomerId());
         
         if (auctionsWon.isEmpty() == false) {
             System.out.printf("%8s%16s%35s%12s\n", "Auction Listing ID", "Product Name", "Your Winning Bid", "Address");
             for (AuctionListing auctionWon : auctionsWon) {
-                int size = auctionWon.getBids().size();
-                Bid winningBid = auctionWon.getBids().get(size - 1);
+                Bid winningBid = auctionListingControllerRemote.findLargestBid(auctionWon);
                 if (winningBid.getAddress() == null) {
                     System.out.printf("%8s%26s%25s%12s\n", auctionWon.getAuctionListingId().toString(), auctionWon.getProductName(), auctionWon.getCurrentHighestPrice(), "Not Assigned");
                 } else {
@@ -716,15 +745,15 @@ public class AuctionModule {
         Long auctionListingId = sc.nextLong();
         try {
             auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionListingId);
-            int size = auctionListing.getBids().size();
-            Bid winningBid = auctionListing.getBids().get(size - 1);
-            if (winningBid.getAddress() != null || !(winningBid.getCustomer().equals(currentCustomer))) {
-                System.out.println("Sorry, you did not win the selected auction or an address has already been selected for the won auction");
-                return;
-            }
+           
+//            if (winningBid.getAddress() != null || !(winningBid.getCustomer().equals(currentCustomer))) {
+//                System.out.println("Sorry, you did not win the selected auction or an address has already been selected for the won auction");
+//                return;
+//            }
         } catch (AuctionListingNotFoundException ex) {
             System.out.println("Error occurred :" + ex.getMessage());
         }
+        Bid winningBid = auctionListingControllerRemote.findLargestBid(auctionListing);
         
         boolean noEnabled = true;
         
@@ -758,10 +787,9 @@ public class AuctionModule {
                     System.out.println("Sorry address is disabled");
                     return;
                 } else {
-                    int size = auctionListing.getBids().size();
-                    Bid winningBid = auctionListing.getBids().get(size - 1);
                     winningBid.setAddress(add);
-                    add.getBidsWon().add(winningBid);
+                    add.setUsed(true);
+//                    add.getBidsWon().add(winningBid);
                     bidControllerRemote.updateBid(winningBid);
                     customerControllerRemote.updateAddress(add);
                     System.out.println("Address successfully set to bid!");
