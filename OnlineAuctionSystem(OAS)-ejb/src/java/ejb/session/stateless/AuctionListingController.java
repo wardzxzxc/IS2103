@@ -79,7 +79,7 @@ public class AuctionListingController implements AuctionListingControllerRemote,
             return (AuctionListing)query.getSingleResult();
         }
         catch(NoResultException | NonUniqueResultException ex) {
-            throw new AuctionListingNotFoundException("AuctionListing " + name + "does not exist");
+            throw new AuctionListingNotFoundException("Auction Listing " + name + " does not exist");
         }
     }
     

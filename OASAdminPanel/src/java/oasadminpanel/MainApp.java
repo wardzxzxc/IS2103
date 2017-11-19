@@ -48,10 +48,17 @@ public class MainApp {
             while(response <1 || response >2) {
                 System.out.println("> ");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if(response == 1) {
-                    
+
                     try {
                         doLogin();
                         if (currentEmployee.getAccessRight() == EmployeeAccessRightsEnum.SYSTEMADMIN) {

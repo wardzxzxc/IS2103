@@ -31,6 +31,7 @@ public class SystemAdministrationModule {
     public void systemAdministrationMenu() {
         
         Scanner sc = new Scanner(System.in);
+        
         Integer response = 0;
         
         while(true) {
@@ -43,10 +44,18 @@ public class SystemAdministrationModule {
             response = 0;
             
             while(response < 1 || response > 5) {
+                
                 System.out.println("> ");
+
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
                 
                 response = sc.nextInt();
-                
+                sc.nextLine();
+
                 if(response == 1) {
                     doCreateNewEmployee();
                 }
@@ -128,15 +137,23 @@ public class SystemAdministrationModule {
         
         System.out.println("*** OAS Admin Panel :: System Administration :: View Employee Details ***\n");
         System.out.print("Enter Employee ID> ");
+        
+        while(!sc.hasNextLong()) {
+            System.out.println("Invalid option, please try again!\n");
+            System.out.println("Enter Employee ID> ");
+            sc.nextLine();
+        }
+        
         Long employeeId = sc.nextLong();
+        sc.nextLine();
         
         while (true) {
             
             try
             {
                 Employee employee = employeeControllerRemote.retrieveEmployeeByEmployeeId(employeeId);
-                System.out.printf("%8s%20s%20s%15s%20s%20s\n", "Employee ID", "First Name", "Last Name", "Access Right", "Username", "Password");
-                System.out.printf("%8s%20s%20s%15s%20s%20s\n", employee.getEmployeeId().toString(), employee.getFirstName(), employee.getLastName(), employee.getAccessRight().toString(), employee.getUsername(), employee.getPassword());         
+                System.out.printf("%-16s%-15s%-15s%-18s%-15s%-15s\n", "Employee ID", "First Name", "Last Name", "Access Rights", "Username", "Password");
+                System.out.printf("%-16s%-15s%-15s%-18s%-15s%-15s\n", employee.getEmployeeId().toString(), employee.getFirstName(), employee.getLastName(), employee.getAccessRight().toString(), employee.getUsername(), employee.getPassword());         
                 System.out.println("------------------------");
                 System.out.println("1: Update Employee");
                 System.out.println("2: Delete Employee");
@@ -146,8 +163,15 @@ public class SystemAdministrationModule {
                 while(response < 1 || response > 3)
                 {
                     System.out.print("> ");
+                    
+                    while(!sc.hasNextInt()) {
+                        System.out.println("Invalid option, please try again!\n");
+                        System.out.println("> ");
+                        sc.nextLine();
+                    }
 
                     response = sc.nextInt();
+                    sc.nextLine();
 
                     if(response == 1)
                     {
@@ -171,6 +195,7 @@ public class SystemAdministrationModule {
             catch(EmployeeNotFoundException ex)
             {
                 System.out.println("An error has occurred while retrieving employee: " + ex.getMessage() + "\n");
+                break;
             }
             
             if (response == 3) {
@@ -190,7 +215,7 @@ public class SystemAdministrationModule {
             System.out.println("*** OAS Admin Panel :: System Administration :: View Employee Details :: Update Employee ***\n");
             System.out.println("1: Edit First Name");
             System.out.println("2: Edit Last Name");
-            System.out.println("3: Edit Access Right");
+            System.out.println("3: Edit Access Rights");
             System.out.println("4: Edit Password");
             System.out.println("5: Back\n");
             
@@ -200,54 +225,73 @@ public class SystemAdministrationModule {
                 
                 System.out.print(">");
                 
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if (response == 1) {
-                   String newFirstName = sc.next().trim();
-                   employee.setFirstName(newFirstName);
-                   employeeControllerRemote.updateEmployee(employee);
-                   System.out.println("Employee's First Name updated successfully!\n");
+                    System.out.println("Enter a new First Name> ");
+                    String newFirstName = sc.nextLine().trim();
+                    employee.setFirstName(newFirstName);
+                    employeeControllerRemote.updateEmployee(employee);
+                    System.out.println("Employee's First Name updated successfully!\n");
                 }
                 else if (response == 2) {
-                   String newLastName = sc.next().trim();
-                   employee.setLastName(newLastName);
-                   employeeControllerRemote.updateEmployee(employee);
-                   System.out.println("Employee's Last Name updated successfully!\n"); 
+                    System.out.println("Enter a new Last Name> ");
+                    String newLastName = sc.nextLine().trim();
+                    employee.setLastName(newLastName);
+                    employeeControllerRemote.updateEmployee(employee);
+                    System.out.println("Employee's Last Name updated successfully!\n"); 
                 }
                 else if (response == 3) {
                     
                     Integer enumResponse = 0;
                     
-                     while(true) {
+                    while(true) {
                         System.out.print("Select Access Right (1: Finance, 2: Sales, 3: System Admin, 4: Back\n)> ");
+                       
                         enumResponse = 0;
-                        
+
                         while (enumResponse < 1 || enumResponse > 4) {
-                            System.out.println(">");                           
+                            System.out.println("> ");
+                            
+                            while(!sc.hasNextInt()) {
+                                System.out.println("Invalid option, please try again!\n");
+                                System.out.println("> ");
+                                sc.nextLine();
+                            }
+                            
                             enumResponse = sc.nextInt();
+                            sc.nextLine();
 
                             if(enumResponse >= 1 && enumResponse <= 3)
                             {
-                                employee.setAccessRight(EmployeeAccessRightsEnum.values()[enumResponse-1]);
-                                employeeControllerRemote.updateEmployee(employee);
-                                System.out.println("Employee's Access Right updated successfully!\n");
-                                break;
+                               employee.setAccessRight(EmployeeAccessRightsEnum.values()[enumResponse-1]);
+                               employeeControllerRemote.updateEmployee(employee);
+                               System.out.println("Employee's Access Rights updated successfully!\n");
+                               break;
                             }
                             else if (enumResponse == 4)
                             {
-                                break;
+                               break;
                             }
                             else
                             {
-                                System.out.println("Invalid option, please try again!\n");
+                               System.out.println("Invalid option, please try again!\n");
                             }
                         }
                         if (enumResponse == 4) {
-                            break;
+                           break;
                         }
-                     }
+                    }
                 }
                 else if (response == 4) {
+                    System.out.println("Please enter new Password> ");
                     String newPassword = sc.next().trim();
                     employee.setPassword(newPassword);
                     employeeControllerRemote.updateEmployee(employee);
@@ -308,33 +352,42 @@ public class SystemAdministrationModule {
         System.out.println("*** OAS Admin Panel :: System Administration :: View All Employees ***\n");
         
         List<Employee> employees = employeeControllerRemote.retrieveAllEmployees();
-        System.out.printf("%8s%20s%20s%15s%20s%20s\n", "Employee ID", "First Name", "Last Name", "Access Right", "Username", "Password");
+        System.out.printf("%-16s%-15s%-15s%-18s%-15s%-15s\n", "Employee ID", "First Name", "Last Name", "Access Rights", "Username", "Password");
 
         for(Employee employee:employees)
         {
-            System.out.printf("%8s%20s%20s%15s%20s%20s\n", employee.getEmployeeId().toString(), employee.getFirstName(), employee.getLastName(), employee.getAccessRight().toString(), employee.getUsername(), employee.getPassword());
+            System.out.printf("%-16s%-15s%-15s%-18s%-15s%-15s\n", employee.getEmployeeId().toString(), employee.getFirstName(), employee.getLastName(), employee.getAccessRight().toString(), employee.getUsername(), employee.getPassword());
         }
         
-        System.out.print("Press any key to continue...> ");
+        System.out.print("Press enter to continue...> ");
         sc.nextLine();
         
     }
     
-        private void doChangeMyPassword(Employee employee) {
+    private void doChangeMyPassword(Employee employee) {
         
         Scanner sc = new Scanner(System.in);
         
         System.out.println("*** OAS Admin Panel :: System Administration :: Change My Password ***\n");
-        System.out.println("Enter old password> ");
+        System.out.println("Enter current password> ");
         String oldPassword = sc.next().trim();
         System.out.println("Enter new password> ");
         String newPassword = sc.next().trim();
+        System.out.println("Enter new password again> ");
+        String newPasswordAgain = sc.next().trim();
         
-         if (employee.getPassword().equals(oldPassword)) {
+        if (!(newPassword.equals(newPasswordAgain))) {
+            System.out.println("Please make sure that both new passwords are the same.");
+        }
+        
+        else if (employee.getPassword().equals(oldPassword)) {
             employee.setPassword(newPassword);
             employeeControllerRemote.updateEmployee(employee);
-        } else {
-            System.out.println("Old password does not match");
+            System.out.println("Password changed successfully!");
+        }
+        
+        else {
+            System.out.println("Current password does not match, please try again.");
         }
         
     }

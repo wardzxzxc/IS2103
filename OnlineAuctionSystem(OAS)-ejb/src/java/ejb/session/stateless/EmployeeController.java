@@ -61,7 +61,7 @@ public class EmployeeController implements EmployeeControllerRemote, EmployeeCon
         if (employee != null) {
             return employee;
         } else {
-            throw new EmployeeNotFoundException("Employee ID " + employeeId + "does not exist");
+            throw new EmployeeNotFoundException("Employee ID " + employeeId + " does not exist");
         }
     }
     
