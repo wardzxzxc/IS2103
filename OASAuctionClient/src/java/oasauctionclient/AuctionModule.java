@@ -10,7 +10,6 @@ import entity.Bid;
 import entity.CreditPackage;
 import entity.CreditTransaction;
 import entity.Customer;
-import static java.lang.System.out;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
@@ -90,13 +89,13 @@ public class AuctionModule {
                     doPurchaseCreditPackage();
                 }
                 else if(response == 9) {
-                    doBrowseAllWonAuctions();
+                    doBrowseAllAuctions();
                 }
                 else if(response == 10) {
-                    
+                    viewAuctionDetails();
                 }
                 else if(response == 11) {
-                    
+                    doBrowseAllWonAuctions();
                 }
                 else if (response == 12) {
                     break;
@@ -218,9 +217,11 @@ public class AuctionModule {
         
         Address newAddress = new Address(addressLine1, addressLine2, postalCode, currentCustomer);
         
-        currentCustomer = customerControllerRemote.addNewAddress(currentCustomer, newAddress);
-        System.out.println("New address added successfully!");
-        
+        newAddress = customerControllerRemote.createAddress(newAddress);
+        List<Address> allAdds = customerControllerRemote.retrieveAllAddresses(currentCustomer.getUsername());
+        allAdds.add(newAddress);
+        currentCustomer = customerControllerRemote.updateCustomer(currentCustomer);
+        System.out.println("Address created successfully! " + "AddressID : " + newAddress.getAddressId() + "\n");
     }
     
     public void doViewAddressDetails() {
@@ -356,7 +357,7 @@ public class AuctionModule {
         input = sc.nextLine().trim();
         
         if(input.equals("Y"))
-        {   if (address.getBidsWon().isEmpty() == true) {
+        {   if ((customerControllerRemote.retrieveBidsWon(address.getAddressId())).isEmpty()) {
                 try 
                 {
                     currentCustomer = customerControllerRemote.deleteAddress(address.getAddressId());
@@ -389,8 +390,10 @@ public class AuctionModule {
         
         boolean noEnabled = true;
         
-        if (!currentCustomer.getAddresses().isEmpty()) {
-            for (Address add:currentCustomer.getAddresses()) {
+        List<Address> allAddresses = customerControllerRemote.retrieveAllAddresses(currentCustomer.getUsername());
+        
+        if (!(allAddresses.isEmpty())) {
+            for (Address add : allAddresses) {
                 if (add.isEnabled()) {
                     noEnabled = false;
                 }
@@ -398,14 +401,14 @@ public class AuctionModule {
         }
         
         
-        if (currentCustomer.getAddresses().isEmpty() || noEnabled) {
+        if (allAddresses.isEmpty() || noEnabled) {
             System.out.println("You do have any address registered, please create a new address!");
         }
         
         else {
             System.out.printf("%8s%50s%50s%8s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
             
-            for (Address add:currentCustomer.getAddresses()) {
+            for (Address add : allAddresses) {
                 if (add.isEnabled()) {
                     System.out.printf("%8s%50s%50s%8s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
                 }
@@ -436,14 +439,14 @@ public class AuctionModule {
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Credit Transaction History ***\n");        
         
-        if (currentCustomer.getCreditTransaction().isEmpty()) {
+        if (currentCustomer.getCreditTransactions().isEmpty()) {
             System.out.println("You do have any credit transaction history!");
         }
         
         else {
             System.out.printf("%8s%10s%15s%50s\n", "Credit Transaction ID", "Amount", "Transaction Type", "Transaction Date Time");
             
-            for (CreditTransaction ct:currentCustomer.getCreditTransaction()) {
+            for (CreditTransaction ct:currentCustomer.getCreditTransactions()) {
                 System.out.printf("%8s%10s%15s%50s\n", ct.getCreditTransactionId().toString(), ct.getAmount().toString(), ct.getCreditTransactionType().toString(), ct.getTransactionDateTime().toString());
             }
         }
@@ -602,10 +605,12 @@ public class AuctionModule {
          try {
              bidControllerRemote.createNewBid(bidPlaced);
          } catch(BidExistException | GeneralException ex) {
-              System.out.println("An error occurred in registering your new account " + ex.getMessage() + "\n");
+              System.out.println("An error occurred: " + ex.getMessage() + "\n");
          }
          
-         auctionListing.getBids().add(bidPlaced);
+        List<Bid> allBids = auctionListingControllerRemote.retrieveLinkedBids(auctionListing.getAuctionListingId());
+         
+         allBids.add(bidPlaced);
          auctionListing.setCurrentHighestPrice(bidPlaced.getAmount());
          auctionListingControllerRemote.updateAuctionListing(auctionListing);
             
@@ -736,15 +741,7 @@ public class AuctionModule {
             
         }
         
-    }
-    
-    
-            
-        
-        
-        
-        
-        
+    }       
         
     }
 }

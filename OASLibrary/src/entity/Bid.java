@@ -42,6 +42,7 @@ public class Bid implements Serializable {
     private AuctionListing auctionWon;
 
     public Bid() {
+        this.amount = BigDecimal.ZERO;
     }
 
     public Bid(BigDecimal amount, Customer customer, AuctionListing auctionListing) {

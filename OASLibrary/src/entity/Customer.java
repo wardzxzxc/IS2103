@@ -43,7 +43,7 @@ public class Customer implements Serializable {
     private BigDecimal creditCurrBalance;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    private List<CreditTransaction> creditTransaction;
+    private List<CreditTransaction> creditTransactions;
     @OneToMany(mappedBy = "winner")
     private List<AuctionListing> auctionsWon;
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
@@ -53,7 +53,7 @@ public class Customer implements Serializable {
     
     public Customer() {
         this.creditCurrBalance = new BigDecimal("0.0000");
-        this.creditTransaction = new ArrayList<>();
+        this.creditTransactions = new ArrayList<>();
         this.auctionsWon = new ArrayList<>();
         this.bids = new ArrayList<>();
         this.addresses = new ArrayList<>();
@@ -68,12 +68,12 @@ public class Customer implements Serializable {
         this.contactNumber = contactNumber;
     }
 
-    public List<CreditTransaction> getCreditTransaction() {
-        return creditTransaction;
+    public List<CreditTransaction> getCreditTransactions() {
+        return creditTransactions;
     }
     
-    public void setCreditTransaction(List<CreditTransaction> creditTransaction) {
-        this.creditTransaction = creditTransaction;
+    public void setCreditTransactions(List<CreditTransaction> creditTransactions) {
+        this.creditTransactions = creditTransactions;
     }
 
     public List<AuctionListing> getAuctionsWon() {

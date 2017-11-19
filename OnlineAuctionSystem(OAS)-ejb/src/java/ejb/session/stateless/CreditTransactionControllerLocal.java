@@ -5,19 +5,16 @@
  */
 package ejb.session.stateless;
 
+import entity.CreditTransaction;
+import javax.ejb.Local;
+
 /**
  *
  * @author Edward
  */
-public class CreditTransactionExistException extends Exception {
+@Local
+public interface CreditTransactionControllerLocal {
 
-    public CreditTransactionExistException() {
-    }
-
-    public CreditTransactionExistException(String message) {
-        super(message);
-    }
-    
-    
+    public CreditTransaction createCreditTransaction(CreditTransaction ct);
     
 }

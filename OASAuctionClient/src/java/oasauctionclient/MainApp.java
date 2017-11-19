@@ -17,6 +17,8 @@ public class MainApp {
     private AuctionListingControllerRemote auctionListingControllerRemote;
     private BidControllerRemote bidControllerRemote;
     
+    private AuctionModule auctionModule;
+    
     
     private Customer currentCustomer;
 
@@ -123,6 +125,8 @@ public class MainApp {
             {                   
                 currentCustomer = customerControllerRemote.customerLogin(username, password);
                 System.out.println("Login successful!\n");
+                AuctionModule auctionModule = new AuctionModule(customerControllerRemote, creditPackageControllerRemote,  auctionListingControllerRemote, bidControllerRemote, currentCustomer);
+                auctionModule.auctionMenu();
             }        
             catch (InvalidLoginCredentialException ex)
             {

@@ -11,6 +11,6 @@ package util.enumeration;
  */
 public enum CreditTransactionTypeEnum {
     
-    PURCHASE, BIDDING
+    PURCHASE, BIDDING, WINNING_BID, REFUND
     
 }

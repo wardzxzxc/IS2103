@@ -8,8 +8,10 @@ package ejb.session.stateless;
 import timer.NewTimerSessionBeanLocal;
 import entity.AuctionListing;
 import entity.Bid;
+import entity.CreditTransaction;
 import entity.Customer;
 import static entity.Employee_.employeeId;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Local;
@@ -21,6 +23,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import util.enumeration.CreditTransactionTypeEnum;
 import util.exception.AuctionListingExistException;
 import util.exception.AuctionListingNotFoundException;
 import util.exception.GeneralException;
@@ -100,16 +103,11 @@ public class AuctionListingController implements AuctionListingControllerRemote,
     }
     
     @Override
-    public List<Bid> retrieveLinkedBids(Long auctionId) throws AuctionListingNotFoundException {
-        AuctionListing auctionListing = retrieveAuctionListingById(auctionId);
-        List<Bid> bids = auctionListing.getBids();
-        
-        for (Bid bid:bids) {
-            em.detach(bid);
-            bid.setAuctionListing(null);
-            bid.setCustomer(null);
-        }
-        return bids;
+    public List<Bid> retrieveLinkedBids(Long auctionId) {
+        AuctionListing auctionListing = em.find(AuctionListing.class, auctionId);
+        auctionListing.getBids().size();
+       
+        return auctionListing.getBids();
     }
     
     @Override
@@ -140,13 +138,27 @@ public class AuctionListingController implements AuctionListingControllerRemote,
         return highestBid;
     }
     
+//    @Override
+//    public void refundBidsExceptWinningBid(Auction auctionListing)
     
     @Override
     public void refundBids(AuctionListing auctionListing) {
         List<Bid> allBids = auctionListing.getBids();
         for (Bid bid : allBids) {
-            Customer customer = bid.getCustomer();
-            customer.setCreditCurrBalance((customer.getCreditCurrBalance()).add(bid.getAmount()));
+            Date date = new Date();
+            Customer bidder = bid.getCustomer();
+            bidder.setCreditCurrBalance((bidder.getCreditCurrBalance()).add(bid.getAmount()));
+            CreditTransaction refund = new CreditTransaction();
+            refund.setAmount(bid.getAmount());
+            refund.setCustomer(bidder);
+            refund.setTransactionDateTime(date);
+            refund.setCreditTransactionType(CreditTransactionTypeEnum.REFUND);
+            em.persist(refund);
+            em.flush();
+            em.refresh(refund);
+            bidder.getCreditTransactions().add(refund);
+            em.refresh(bidder);
+            
         }
     }
     
