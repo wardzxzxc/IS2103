@@ -471,7 +471,7 @@ public class AuctionModule {
         
         System.out.println("*** OAS Auction Client :: Auction Menu :: View Credit Balance ***\n");
         
-        System.out.println("Your current credit balance is: " + currentCustomer.getCreditCurrBalance().toString());
+        System.out.println("Your current credit balance is: " + customerControllerRemote.retrieveCustomerById(currentCustomer.getCustomerId()).getCreditCurrBalance().toString());
         
         System.out.println("Press enter to continue...> ");
         sc.nextLine();
@@ -803,9 +803,10 @@ public class AuctionModule {
         Bid winningBid = auctionListingControllerRemote.findLargestBid(auctionListing);
         
         boolean noEnabled = true;
+        List<Address> allAdd = customerControllerRemote.retrieveAllAddresses(currentCustomer.getCustomerId());
         
-        if (!currentCustomer.getAddresses().isEmpty()) {
-            for (Address add:currentCustomer.getAddresses()) {
+        if (!allAdd.isEmpty()) {
+            for (Address add: allAdd) {
                 if (add.isEnabled()) {
                     noEnabled = false;
                 }
@@ -813,14 +814,14 @@ public class AuctionModule {
         }
         
         
-        if (currentCustomer.getAddresses().isEmpty() || noEnabled) {
+        if (allAdd.isEmpty() || noEnabled) {
             System.out.println("You do have any address registered, please create a new address!\n");
         }
         
         else {
             System.out.printf("%-12s%-25s%-18s%-15s\n", "Address ID", "Address Line 1", "Address Line 2", "Postal Code");
             
-            for (Address add:currentCustomer.getAddresses()) {
+            for (Address add : allAdd) {
                 if (add.isEnabled()) {
                     System.out.printf("%-12s%-25s%-18s%-15s\n", add.getAddressId().toString(), add.getAddressLine1(), add.getAddressLine2(), add.getPostalCode());
                 }

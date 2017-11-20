@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://localhost:8080/AISG/AISG?wsdl" uri="src/conf/xml-resources/web-service-references/AISG/wsdl/localhost_8080/AISG/AISG.wsdl"/>
+    <system systemId="http://localhost:8080/AISG/AISG?xsd=1" uri="src/conf/xml-resources/web-service-references/AISG/wsdl/localhost_8080/AISG/AISG.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/AISGWebService/AISGWebService?wsdl" uri="wsdl/localhost_8080/AISGWebService/AISGWebService.wsdl"/>
+    <system systemId="http://localhost:8080/AISGWebService/AISGWebService?xsd=1" uri="wsdl/localhost_8080/AISGWebService/AISGWebService.xsd_1.xsd"/>
+</catalog>

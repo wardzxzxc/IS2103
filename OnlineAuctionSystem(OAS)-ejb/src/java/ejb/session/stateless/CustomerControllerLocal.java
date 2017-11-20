@@ -53,4 +53,6 @@ public interface CustomerControllerLocal {
 
     public Customer addCredTransaction(CreditTransaction ct, Long customerId);
     
+    public Customer retrieveCustomerById(Long id);
+    
 }

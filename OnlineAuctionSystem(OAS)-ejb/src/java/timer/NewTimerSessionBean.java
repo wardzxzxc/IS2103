@@ -164,7 +164,7 @@ public class NewTimerSessionBean implements NewTimerSessionBeanRemote, NewTimerS
                 if (highestPrice.compareTo(auctionListing.getReservePrice()) > 0) {
                     auctionListingController.closeAuctionAboveReserve(auctionListing.getAuctionListingId());
                 } else {
-                    return;
+                    auctionListing.setNeedManualAssign(true);
                 }
             }
         }

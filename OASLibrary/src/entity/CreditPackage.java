@@ -27,15 +27,27 @@ public class CreditPackage implements Serializable {
     @Column(nullable = false)
     private Boolean enabled;
     @Column(nullable = false, precision = 18, scale = 4)
-    private BigDecimal creditPerPackage;    
+    private BigDecimal creditPerPackage;
+    private Boolean used;
 
     public CreditPackage() {
+        this.used = false;
     }
 
     public CreditPackage(Boolean enabled, BigDecimal creditPerPackage) {
         this.enabled = enabled;
         this.creditPerPackage = creditPerPackage;
+        this.used = false;
     }
+
+    public Boolean getUsed() {
+        return used;
+    }
+
+    public void setUsed(Boolean used) {
+        this.used = used;
+    }
+    
     
     public Long getCreditPackageId() {
         return creditPackageId;

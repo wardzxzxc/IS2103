@@ -158,14 +158,19 @@ public class AuctionListingController implements AuctionListingControllerRemote,
             Date date = new Date();
             Customer bidder = bid.getCustomer();
             bidder.setCreditCurrBalance((bidder.getCreditCurrBalance()).add(bid.getAmount()));
+            em.flush();
+            em.refresh(bidder);
             CreditTransaction refund = new CreditTransaction(date, bid.getAmount(), CreditTransactionTypeEnum.REFUND, bidder);
             em.persist(refund);
             em.flush();
             em.refresh(refund);
             customerControllerLocal.addCredTransaction(refund, bidder.getCustomerId());
-            em.refresh(bidder);
             
         }
+        auctionListing.setNeedManualAssign(false);
+        em.merge(auctionListing);
+        em.flush();
+
     }
     
     @Override
@@ -208,17 +213,19 @@ public class AuctionListingController implements AuctionListingControllerRemote,
         em.flush();
         em.refresh(winner);
         auctionListing.setWinner(winner);
+        auctionListing.setNeedManualAssign(false);
         em.flush();
         em.refresh(auctionListing);
 
         for (Bid bid : allBids) {
             BigDecimal amount = bid.getAmount();
             Customer bidder = bid.getCustomer();                        
-            bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
+//            em.flush();
             CreditTransaction refund = new CreditTransaction(date, amount, CreditTransactionTypeEnum.REFUND, bidder);
             em.persist(refund);
             em.flush();
             em.refresh(refund);
+            bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
             bidder.getCreditTransactions().add(refund);
             em.flush();
             em.refresh(bidder);

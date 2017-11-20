@@ -49,6 +49,7 @@ public class AuctionListing implements Serializable {
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDateTime;
+    private Boolean needManualAssign;
     
     @ManyToOne(cascade = CascadeType.ALL)
     private Customer winner;
@@ -61,6 +62,7 @@ public class AuctionListing implements Serializable {
         bids = new ArrayList<>();
         active = false;
         expired = false;
+        needManualAssign = false;
     }
 
     public AuctionListing(BigDecimal reservePrice, String productName, Date startDateTime, Date endDateTime) {
@@ -70,8 +72,18 @@ public class AuctionListing implements Serializable {
         this.productName = productName;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
+        this.needManualAssign = false;
     }
 
+    public Boolean getNeedManualAssign() {
+        return needManualAssign;
+    }
+
+    public void setNeedManualAssign(Boolean needManualAssign) {
+        this.needManualAssign = needManualAssign;
+    }
+
+    
     public Bid getWinningBid() {
         return winningBid;
     }

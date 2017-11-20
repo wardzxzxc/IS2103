@@ -79,6 +79,11 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
     
     @Override
+    public Customer retrieveCustomerById(Long id) {
+        return em.find(Customer.class, id);
+    }
+    
+    @Override
     public Customer customerLogin(String username, String password) throws InvalidLoginCredentialException {
         
         try {
@@ -221,9 +226,9 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         if (address != null) {
             Customer customer = address.getCustomer();
             customer.getAddresses().remove(address);
-            em.refresh(customer);
             em.remove(address);
             em.flush();
+            em.refresh(customer);
             return customer;
         } else {
             throw new AddressNotFoundException("Address ID " + addressId.toString() + "does not exist");
@@ -238,6 +243,8 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         
         CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
         
+        creditPackage.setUsed(true);
+
         Customer customer = em.find(Customer.class, customerId);
         
         BigDecimal purchasedAmount = creditPackage.getCreditPerPackage().multiply(new BigDecimal(numUnits));

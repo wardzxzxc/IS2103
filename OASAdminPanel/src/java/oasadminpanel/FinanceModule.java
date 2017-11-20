@@ -131,8 +131,8 @@ public class FinanceModule {
         try
         {
             CreditPackage creditPackage = creditPackageControllerRemote.retrieveCreditPackageById(creditPackageId);
-            System.out.printf("%-20s%-24s%-10s\n", "Credit Package ID", "Credits Per Package", "Enabled");
-            System.out.printf("%-20s%-24s%-10s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled().toString());         
+            System.out.printf("%-20s%-24s%-10s%-10s\n", "Credit Package ID", "Credits Per Package", "Enabled", "Used");
+            System.out.printf("%-20s%-24s%-10s%-10s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled().toString(), creditPackage.getUsed());         
             System.out.println("------------------------");
             System.out.println("1: Update Credit Package");
             System.out.println("2: Delete Credit Package");
@@ -199,11 +199,11 @@ public class FinanceModule {
         System.out.println("*** OAS Admin Panel :: Finance :: View All Credit Packages ***\n");
         
         List<CreditPackage> creditPackages = creditPackageControllerRemote.retrieveAllCreditPackage();
-        System.out.printf("%-20s%-24s%-10s\n", "Credit Package ID", "Credits Per Package", "Enabled");
+        System.out.printf("%-20s%-24s%-10s%-15s\n", "Credit Package ID", "Credits Per Package", "Enabled", "Used" );
 
         for(CreditPackage creditPackage:creditPackages)
         {
-            System.out.printf("%-20s%-24s%-10s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled().toString());
+            System.out.printf("%-20s%-24s%-10s%-15s\n", creditPackage.getCreditPackageId().toString(), creditPackage.getCreditPerPackage().toString(), creditPackage.getEnabled().toString(), creditPackage.getUsed());
         }
         
         System.out.print("Press enter to continue...> ");
@@ -217,15 +217,15 @@ public class FinanceModule {
         String input;
         
         System.out.println("*** OAS Admin Panel :: Finance :: View Credit Package Details :: Delete Credit Package ***\n");
-        System.out.printf("Confirm Delete Credit Package (Credits Per Package: %d) (Enter 'Y' to Delete)> ", creditPackage.getCreditPerPackage());
+        System.out.printf("Confirm Delete Credit Package (Credits Per Package: %s) (Enter 'Y' to Delete)> ", creditPackage.getCreditPerPackage().toString());
         input = sc.nextLine().trim();
         
         if(input.equals("Y"))
         {
             try 
-            {
+            {   
                 creditPackageControllerRemote.deleteCreditPackage(creditPackage.getCreditPackageId());
-                System.out.println("Credit package deleted successfully!\n");
+                System.out.println("Credit package deleted/diabled successfully!\n");
             } 
             catch (CreditPackageNotFoundException ex) 
             {

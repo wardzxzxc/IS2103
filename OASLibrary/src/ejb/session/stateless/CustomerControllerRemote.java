@@ -53,6 +53,8 @@ public interface CustomerControllerRemote {
     
     public Customer addCredTransaction(CreditTransaction ct, Long customerId);
     
+    public Customer retrieveCustomerById(Long id);
+    
       
       
 }

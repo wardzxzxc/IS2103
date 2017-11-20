@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.2-b608 (trunk-7979; 2015-01-21T12:50:19+0000) JAXWS-RI/2.2.11-b150120.1832 JAXWS-API/2.2.12 JAXB-RI/2.2.12-b141219.1637 JAXB-API/2.2.13-b141020.1521 svn-revision#unknown. --><xs:schema xmlns:tns="http://ws.session.ejb/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://ws.session.ejb/">
+
+<xs:element name="InvalidLoginCredentialException" type="tns:InvalidLoginCredentialException"/>
+
+<xs:element name="Premium Registration" type="tns:Premium Registration"/>
+
+<xs:element name="Premium RegistrationResponse" type="tns:Premium RegistrationResponse"/>
+
+<xs:element name="Remote Browse All Auctoin Listings" type="tns:Remote Browse All Auctoin Listings"/>
+
+<xs:element name="Remote Browse All Auctoin ListingsResponse" type="tns:Remote Browse All Auctoin ListingsResponse"/>
+
+<xs:element name="Remote Login" type="tns:Remote Login"/>
+
+<xs:element name="Remote LoginResponse" type="tns:Remote LoginResponse"/>
+
+<xs:element name="Remote View Auction Listing Details" type="tns:Remote View Auction Listing Details"/>
+
+<xs:element name="Remote View Auction Listing DetailsResponse" type="tns:Remote View Auction Listing DetailsResponse"/>
+
+<xs:element name="Remote View Credi Balance" type="tns:Remote View Credi Balance"/>
+
+<xs:element name="Remote View Credi BalanceResponse" type="tns:Remote View Credi BalanceResponse"/>
+
+<xs:element name="Remote View Won Auction Listings" type="tns:Remote View Won Auction Listings"/>
+
+<xs:element name="Remote View Won Auction ListingsResponse" type="tns:Remote View Won Auction ListingsResponse"/>
+
+<xs:complexType name="Remote View Auction Listing Details">
+<xs:sequence>
+<xs:element name="auctionId" type="xs:long" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Remote View Auction Listing DetailsResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="Remote Login">
+<xs:sequence>
+<xs:element name="username" type="xs:string" minOccurs="0"/>
+<xs:element name="password" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Remote LoginResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="InvalidLoginCredentialException">
+<xs:sequence>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Remote View Credi Balance">
+<xs:sequence>
+<xs:element name="customerId" type="xs:long" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Remote View Credi BalanceResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Remote Browse All Auctoin Listings">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="Remote Browse All Auctoin ListingsResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="Premium Registration">
+<xs:sequence>
+<xs:element name="username" type="xs:string" minOccurs="0"/>
+<xs:element name="password" type="xs:string" minOccurs="0"/>
+<xs:element name="firstName" type="xs:string" minOccurs="0"/>
+<xs:element name="lastName" type="xs:string" minOccurs="0"/>
+<xs:element name="contactNumber" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Premium RegistrationResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="Remote View Won Auction Listings">
+<xs:sequence>
+<xs:element name="arg0" type="xs:long" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Remote View Won Auction ListingsResponse">
+<xs:sequence/>
+</xs:complexType>
+</xs:schema>

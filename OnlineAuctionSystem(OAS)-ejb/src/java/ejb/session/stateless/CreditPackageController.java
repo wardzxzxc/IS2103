@@ -1,6 +1,7 @@
 package ejb.session.stateless;
 
 import entity.CreditPackage;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Local;
 import javax.ejb.Remote;
@@ -83,7 +84,11 @@ public class CreditPackageController implements CreditPackageControllerRemote, C
         CreditPackage creditPackage = em.find(CreditPackage.class, creditPackageId);
         
         if (creditPackage != null) {
-            em.remove(creditPackage);
+            if (creditPackage.getUsed() == false) {
+                em.remove(creditPackage);
+            } else {
+                creditPackage.setEnabled(false);
+            }
         } else {
             throw new CreditPackageNotFoundException("Credit Package does not exist");
         }

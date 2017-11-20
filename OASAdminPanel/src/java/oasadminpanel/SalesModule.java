@@ -372,11 +372,11 @@ public class SalesModule {
         System.out.println("*** OAS Admin Panel :: Sales :: View All Auction Listings Below Reserve Price ***\n");
         
         List<AuctionListing> auctionListings = auctionListingControllerRemote.retrieveAllAuctionListing();
-        System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active");
+        System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s%-20s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active", "Need Manual Assign?" );
         
         for(AuctionListing listing:auctionListings) {
             if ((listing.getCurrentHighestPrice().compareTo(listing.getReservePrice()) < 0) && (listing.getExpired() == true) && (listing.getWinner() == null)) {
-                System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice().toString(), listing.getReservePrice().toString(), listing.getActive().toString());
+                System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s%-20s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice().toString(), listing.getReservePrice().toString(), listing.getActive().toString(), listing.getNeedManualAssign());
             }
         }
         
@@ -461,9 +461,10 @@ public class SalesModule {
         AuctionListing auctionListing = new AuctionListing();
         try {
             auctionListing = auctionListingControllerRemote.retrieveAuctionListingById(auctionId);
-            
-            if (auctionListing.getExpired() && (auctionListing.getCurrentHighestPrice().compareTo(auctionListing.getReservePrice()) > 0)) {
-                System.out.println("Sorry Auction ID " + auctionListing.getAuctionListingId() + " has a highest bid that is greater than the reserve price");
+            System.out.println(auctionListing.getCurrentHighestPrice().toString());           
+            System.out.println(auctionListing.getReservePrice().toString());
+            if (auctionListing.getNeedManualAssign() == false) {
+                System.out.println("Sorry Auction ID " + auctionListing.getAuctionListingId() + " does not need manual intervention.");
                 return;       
             }
             Bid highestBid = auctionListingControllerRemote.findLargestBid(auctionListing);
