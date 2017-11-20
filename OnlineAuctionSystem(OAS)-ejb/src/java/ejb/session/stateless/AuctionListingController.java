@@ -205,6 +205,7 @@ public class AuctionListingController implements AuctionListingControllerRemote,
         em.flush();
         em.refresh(winnerTransaction);
         winner.getCreditTransactions().add(winnerTransaction);
+        em.flush();
         em.refresh(winner);
         auctionListing.setWinner(winner);
         em.flush();
