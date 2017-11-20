@@ -375,7 +375,7 @@ public class SalesModule {
         System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s\n", "Auction Listing ID", "Product Name", "Start Date Time", "End Date Time", "Current Highest Price", "Reserve Price", "Active");
         
         for(AuctionListing listing:auctionListings) {
-            if ((listing.getCurrentHighestPrice().compareTo(listing.getReservePrice()) < 0) && (listing.getExpired() == true)) {
+            if ((listing.getCurrentHighestPrice().compareTo(listing.getReservePrice()) < 0) && (listing.getExpired() == true) && (listing.getWinner() == null)) {
                 System.out.printf("%-20s%-25s%-35s%-35s%-25s%-18s%-12s\n", listing.getAuctionListingId().toString(), listing.getProductName(), listing.getStartDateTime().toString(), listing.getEndDateTime().toString(), listing.getCurrentHighestPrice().toString(), listing.getReservePrice().toString(), listing.getActive().toString());
             }
         }
@@ -390,7 +390,15 @@ public class SalesModule {
             
             while (response < 1 || response > 2) {
                 System.out.println(">");
+                
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
+                }
+                
                 response = sc.nextInt();
+                sc.nextLine();
                 
                 if (response == 1) {
                     doManualAssign();
@@ -439,7 +447,14 @@ public class SalesModule {
         Scanner sc = new Scanner(System.in);
         
         System.out.println("*** OAS Admin Panel :: Sales :: View All Auction Listings Below Reserve Price :: Manually Assign Winning Bid ***\n");
-        System.out.println("Enter Auction ID >");
+        System.out.println("Enter Auction ID> ");
+        
+        while(!sc.hasNextLong()) {
+            System.out.println("Invalid option, please try again!\n");
+            System.out.println("Enter Auction ID> ");
+            sc.nextLine();
+        }
+        
         Long auctionId = sc.nextLong();
         sc.nextLine();
         
@@ -462,28 +477,38 @@ public class SalesModule {
                 System.out.println("2: Close auction with no winning bid");
                 System.out.println("3: Back\n");
                 response = 0;
-                
-                while(response < 1 || response > 2) {
-                    response = sc.nextInt();
-                    if (response == 1) {
-                        auctionListing = auctionListingControllerRemote.closeAuctionAboveReserve(auctionId);
-                        auctionListingControllerRemote.updateAuctionListing(auctionListing);
-                    } else if (response == 2) {
-                        System.out.println("Auction ID " + auctionListing.getAuctionListingId() + " has been successfully closed with no winner.");
-                        System.out.println("All bids will be refunded.");
-                        auctionListingControllerRemote.refundBids(auctionListing);
-                    } else if (response == 3){
-                        break;
-                    } else {
-                        System.out.println("Sorry, please key in a valid option");
-                    }
+                    
+                System.out.println("> ");
+
+                while(!sc.hasNextInt()) {
+                    System.out.println("Invalid option, please try again!\n");
+                    System.out.println("> ");
+                    sc.nextLine();
                 }
-                
-                if (response == 3) {
-                     break;
+
+                response = sc.nextInt();
+                sc.nextLine();
+
+                if (response == 1) {
+                    auctionListing = auctionListingControllerRemote.closeAuctionAboveReserve(auctionId);
+                    System.out.println("Winner assigned successfully.\n");
+                    break;
                 }
-            }                
-        } catch (AuctionListingNotFoundException ex) {
+                else if (response == 2) {
+                    System.out.println("Auction ID " + auctionListing.getAuctionListingId() + " has been successfully closed with no winner.");
+                    System.out.println("All bids will be refunded.\n");
+                    auctionListingControllerRemote.refundBids(auctionListing);
+                    break;
+                }
+                else if (response == 3){
+                    break;
+                }
+                else {
+                    System.out.println("Sorry, please key in a valid option\n");
+                }
+            }
+        }
+        catch (AuctionListingNotFoundException ex) {
             System.out.println("An error has occurred while assigning winning bid " + ex.getMessage() + "\n");
         }
         

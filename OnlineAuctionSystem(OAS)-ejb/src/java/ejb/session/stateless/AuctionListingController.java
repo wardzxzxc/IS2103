@@ -204,31 +204,26 @@ public class AuctionListingController implements AuctionListingControllerRemote,
         em.persist(winnerTransaction);
         em.flush();
         em.refresh(winnerTransaction);
-        List<CreditTransaction> allCreditTransactions = customerControllerLocal.retrieveAllCreditTransaction(winner.getCustomerId());
-        allCreditTransactions.add(winnerTransaction);
+        winner.getCreditTransactions().add(winnerTransaction);
         em.refresh(winner);
         auctionListing.setWinner(winner);
-        updateAuctionListing(auctionListing);
         em.flush();
+        em.refresh(auctionListing);
 
         for (Bid bid : allBids) {
-                BigDecimal amount = bid.getAmount();
-                Customer bidder = bid.getCustomer();                        
-                bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
-                CreditTransaction refund = new CreditTransaction(date, amount, CreditTransactionTypeEnum.REFUND, bidder);
-                em.persist(refund);
-                em.flush();
-                em.refresh(refund);
-                List<CreditTransaction> allCreditTransaction = customerControllerLocal.retrieveAllCreditTransaction(bidder.getCustomerId());
-                allCreditTransaction.add(refund);
-                em.flush();
-                em.refresh(bidder);
-
-            }
+            BigDecimal amount = bid.getAmount();
+            Customer bidder = bid.getCustomer();                        
+            bidder.setCreditCurrBalance(bidder.getCreditCurrBalance().add(amount));
+            CreditTransaction refund = new CreditTransaction(date, amount, CreditTransactionTypeEnum.REFUND, bidder);
+            em.persist(refund);
+            em.flush();
+            em.refresh(refund);
+            bidder.getCreditTransactions().add(refund);
+            em.flush();
+            em.refresh(bidder);
+        }
                 
-
-                
-            return auctionListing;
+        return auctionListing;
     }
     
     

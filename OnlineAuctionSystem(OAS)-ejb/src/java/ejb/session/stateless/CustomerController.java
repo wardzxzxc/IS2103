@@ -153,7 +153,7 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
     }
      
     @Override
-      public List<AuctionListing> retrieveAllAuctionsWon(Long customerId) {
+    public List<AuctionListing> retrieveAllAuctionsWon(Long customerId) {
         Customer customer = em.find(Customer.class, customerId);
         customer.getAuctionsWon().size();
         
@@ -186,7 +186,7 @@ public class CustomerController implements CustomerControllerRemote, CustomerCon
         if (address != null) {
             return address;
         } else {
-            throw new AddressNotFoundException("Address ID " + addressId + "does not exist");
+            throw new AddressNotFoundException("Address ID " + addressId + " does not exist");
         }
         
     }
